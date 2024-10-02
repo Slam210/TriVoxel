@@ -1,10 +1,10 @@
 import express from "express";
-import authRoutes from "./routes/auth.route.js";
 import path from "path";
 import { fileURLToPath } from "url"; // Simulate __dirname in ES modules
 import pg from "pg";
 import dotenv from "dotenv";
 import userRoutes from "./routes/user.route.js";
+import authRoutes from "./routes/auth.route.js";
 
 // Simulate __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +15,7 @@ const { Pool } = pg;
 
 // Initialize Express
 const app = express();
+app.use(express.json());
 
 // Load environment variables
 dotenv.config({
@@ -51,5 +52,5 @@ app.listen(3000, () => {
 });
 
 // Set up routes
+app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);

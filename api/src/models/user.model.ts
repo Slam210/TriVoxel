@@ -18,7 +18,7 @@ const app = express();
 // Load environment variables
 dotenv.config({
   override: true,
-  path: path.join(__dirname, ".env"),
+  path: path.join(__dirname, "../.env"),
 });
 
 // PostgreSQL connection pool configuration
@@ -31,20 +31,38 @@ const pool = new Pool({
 });
 
 // Function to create a new user
-const createUser = async (
+export const createUser = async (
   username: string,
   email: string,
   password: string
 ): Promise<void> => {
-  const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
-  const query = `
-    INSERT INTO users (username, email, password, created_at, updated_at)
-    VALUES ($1, $2, $3, DEFAULT, DEFAULT)  -- Use DEFAULT to insert current timestamps
-    RETURNING *;
-  `;
-
   try {
-    const res = await pool.query(query, [username, email, hashedPassword]);
+    // Check if the username or email already exists
+    const existingUserQuery = `
+      SELECT * FROM users WHERE username = $1 OR email = $2;
+    `;
+    const existingUser = await pool.query(existingUserQuery, [username, email]);
+
+    if (existingUser.rows.length > 0) {
+      console.log("Error: Username or Email already exists.");
+      return;
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Insert new user into the database
+    const insertUserQuery = `
+      INSERT INTO users (username, email, password, created_at, updated_at)
+      VALUES ($1, $2, $3, DEFAULT, DEFAULT)
+      RETURNING *;
+    `;
+    const res = await pool.query(insertUserQuery, [
+      username,
+      email,
+      hashedPassword,
+    ]);
+
     console.log("User created:", res.rows[0]);
   } catch (err) {
     console.error("Error creating user:", err);

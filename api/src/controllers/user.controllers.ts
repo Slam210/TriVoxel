@@ -1,6 +1,3 @@
-export const test = (
-  req: any,
-  res: { json: (arg0: { message: string }) => void }
-) => {
+export const test = (req: any, res: any) => {
   res.json({ message: "API is working" });
 };

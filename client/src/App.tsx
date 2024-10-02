@@ -23,7 +23,7 @@ export default function App() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/resumes" element={<Resumes />} />
         <Route path="/blogs" element={<Blogs />} />
-        <Route path="tutorials" element={<Tutorials />} />
+        <Route path="/tutorials" element={<Tutorials />} />
       </Routes>
     </BrowserRouter>
   );

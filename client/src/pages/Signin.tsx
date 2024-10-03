@@ -1,6 +1,12 @@
 import { Alert, Spinner } from "flowbite-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from "../redux/user/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 // Define an interface for form data
 interface FormData {
@@ -15,9 +21,11 @@ interface CustomError {
 
 export default function Signin() {
   const [formData, setFormData] = useState<FormData>({});
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { loading, error: errorMessage } = useSelector(
+    (state: any) => state.user
+  );
   const handleChange = (e: {
     target: {
       id: any;
@@ -29,11 +37,10 @@ export default function Signin() {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    setLoading(true);
+    dispatch(signInStart());
 
     if (!formData.password || !formData.email) {
-      setErrorMessage("Please fill out all fields.");
-      setLoading(false);
+      dispatch(signInFailure("Please fill out all the fields"));
       return;
     }
 
@@ -47,17 +54,15 @@ export default function Signin() {
       const data = await res.json();
 
       if (data.success === false) {
-        setErrorMessage(data.message);
+        dispatch(signInFailure(data.message));
       }
       if (res.ok) {
+        dispatch(signInSuccess(data));
         navigate("/");
       }
     } catch (error: any) {
       const typedError = error as CustomError;
-      setErrorMessage(typedError.message || "Unexpected error occurred.");
-    } finally {
-      // Always stop loading, even if an error occurs
-      setLoading(false);
+      dispatch(signInFailure(typedError.message));
     }
     return;
   };

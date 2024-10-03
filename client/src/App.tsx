@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import Header from "./components/Header";
+import FooterCom from "./components/Footer";
 import Resumes from "./pages/Resumes";
 import Blogs from "./pages/Blogs";
 import Tutorials from "./pages/Tutorials";
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/blogs" element={<Blogs />} />
         <Route path="/tutorials" element={<Tutorials />} />
       </Routes>
+      <FooterCom />
     </BrowserRouter>
   );
 }

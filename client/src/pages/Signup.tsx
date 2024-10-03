@@ -66,7 +66,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="md:mt-20">
+    <div className="md:mt-20 min-h-screen">
       <div className="flex p-3 max-w-3xl mx-auto flex-col gap-4 md:flex-row md:items-center">
         {/* Left */}
         <div className="hidden md:flex flex-col text-center w-full md:w-1/2 justify-center items-center">

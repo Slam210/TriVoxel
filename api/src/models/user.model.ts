@@ -1,19 +1,12 @@
-import express from "express";
-import path from "path";
-import { fileURLToPath } from "url"; // Simulate __dirname in ES modules
 import pg from "pg";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Simulate __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Destructure Pool from the pg module
-const { Pool } = pg;
-
-// Initialize Express
-const app = express();
 
 // Load environment variables
 dotenv.config({
@@ -22,6 +15,7 @@ dotenv.config({
 });
 
 // PostgreSQL connection pool configuration
+const { Pool } = pg;
 const pool = new Pool({
   user: process.env.USER,
   host: process.env.HOST,
@@ -35,7 +29,7 @@ export const createUser = async (
   username: string,
   email: string,
   password: string
-): Promise<void> => {
+): Promise<boolean> => {
   try {
     // Check if the username or email already exists
     const existingUserQuery = `
@@ -45,7 +39,7 @@ export const createUser = async (
 
     if (existingUser.rows.length > 0) {
       console.log("Error: Username or Email already exists.");
-      return;
+      return false; // Indicate that user creation failed due to a duplicate
     }
 
     // Hash the password
@@ -57,14 +51,12 @@ export const createUser = async (
       VALUES ($1, $2, $3, DEFAULT, DEFAULT)
       RETURNING *;
     `;
-    const res = await pool.query(insertUserQuery, [
-      username,
-      email,
-      hashedPassword,
-    ]);
+    await pool.query(insertUserQuery, [username, email, hashedPassword]);
 
-    console.log("User created:", res.rows[0]);
+    console.log("User created:", username);
+    return true; // User creation successful
   } catch (err) {
     console.error("Error creating user:", err);
+    throw new Error("User creation failed due to a database error");
   }
 };

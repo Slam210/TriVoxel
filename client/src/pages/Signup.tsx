@@ -45,7 +45,6 @@ export default function Signup() {
         body: JSON.stringify(formData),
       });
 
-      console.log("here");
       const data = await res.json();
 
       if (data.success === false) {
@@ -55,7 +54,6 @@ export default function Signup() {
         navigate("/sign-in");
       }
     } catch (error: any) {
-      console.log("here");
       const typedError = error as CustomError;
       setErrorMessage(typedError.message || "Unexpected error occurred.");
     } finally {

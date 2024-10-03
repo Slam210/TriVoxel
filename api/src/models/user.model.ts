@@ -60,3 +60,25 @@ export const createUser = async (
     throw new Error("User creation failed due to a database error");
   }
 };
+
+// Function to find a user by username
+export const findUser = async (email: string = ""): Promise<any | null> => {
+  try {
+    const query = `
+      SELECT * FROM users WHERE email = $1;
+    `;
+
+    // Execute the query with provided parameters
+    const result = await pool.query(query, [email]);
+
+    // Check if any user is found
+    if (result.rows.length > 0) {
+      return result.rows[0]; // Return the first matching user
+    }
+
+    return null; // Return null if no user found
+  } catch (error) {
+    console.error("Error finding user:", error);
+    throw new Error("Database query failed");
+  }
+};

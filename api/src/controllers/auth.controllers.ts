@@ -1,6 +1,21 @@
 import { Request, Response, NextFunction } from "express";
-import { createUser } from "../models/user.model.js";
+import { createUser, findUser } from "../models/user.model.js";
 import { errorHandler } from "../utils/error.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import bcrypt from "bcryptjs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Simulate __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables
+dotenv.config({
+  override: true,
+  path: path.join(__dirname, "../../.env"),
+});
 
 export const signup = async (
   req: Request,
@@ -33,5 +48,53 @@ export const signup = async (
     // Handle any other errors
     next(error);
     return;
+  }
+};
+
+export const signin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  const { email, password } = req.body;
+
+  // Check for missing fields
+  if (!email || !password || email === "" || password === "") {
+    return next(errorHandler(400, "All fields are required"));
+  }
+
+  try {
+    // Use the findUser function to check if the user exists
+    const validUser = await findUser(email);
+
+    if (!validUser) {
+      return next(errorHandler(404, "User not found"));
+    }
+
+    // Here we assume validUser is an object containing the user data
+    const validPassword = bcrypt.compareSync(password, validUser.password);
+
+    if (!validPassword) {
+      return next(errorHandler(400, "Invalid password"));
+    }
+
+    // Generate a token
+    const token = jwt.sign(
+      { id: validUser._id, isAdmin: validUser.isAdmin },
+      process.env.JWT_SECRET as string
+    );
+
+    // Exclude the password from the response
+    const { password: pass, ...rest } = validUser;
+
+    // Send the response with the token
+    res
+      .status(200)
+      .cookie("access_token", token, {
+        httpOnly: true,
+      })
+      .json(rest);
+  } catch (error) {
+    next(error);
   }
 };

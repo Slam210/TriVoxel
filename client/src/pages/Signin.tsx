@@ -7,6 +7,7 @@ import {
   signInFailure,
 } from "../redux/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
+import OAuth from "../components/OAuth";
 
 // Define an interface for form data
 interface FormData {
@@ -131,6 +132,7 @@ export default function Signin() {
                 </button>
               </div>
             </div>
+            <OAuth />
           </form>
           <div className="flex gap-2 text-sm mt-4">
             <span>Don't Have an Account?</span>

@@ -1,6 +1,7 @@
 import { Alert, Spinner } from "flowbite-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import OAuth from "../components/OAuth";
 
 // Define an interface for form data
 interface FormData {
@@ -139,6 +140,7 @@ export default function Signup() {
                 </button>
               </div>
             </div>
+            <OAuth />
           </form>
           <div className="flex gap-2 text-sm mt-4">
             <span>Have an Account?</span>

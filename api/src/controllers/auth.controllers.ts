@@ -98,3 +98,67 @@ export const signin = async (
     next(error);
   }
 };
+
+export const google = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { email, name, googlePhotoUrl } = req.body;
+
+  try {
+    // Check if user exists
+    const user = await findUser(email);
+
+    if (user) {
+      // If user exists, generate JWT token
+      const token = jwt.sign(
+        { id: user.id, isAdmin: user.isAdmin },
+        process.env.JWT_SECRET as string
+      );
+      const { password, ...rest } = user;
+
+      res
+        .status(200)
+        .cookie("access_token", token, {
+          httpOnly: true,
+        })
+        .json(rest);
+    } else {
+      // If user does not exist, generate random password
+      const generatedPassword =
+        Math.random().toString(36).slice(-8) +
+        Math.random().toString(36).slice(-8);
+      const hashedPassword = bcrypt.hashSync(generatedPassword, 10);
+
+      // Create a new user
+      const newUserCreated = await createUser(
+        name.toLowerCase().split(" ").join("") +
+          Math.random().toString(9).slice(-4),
+        email,
+        hashedPassword
+      );
+
+      if (newUserCreated) {
+        // Fetch the new user after successful creation
+        const newUser = await findUser(email);
+        const token = jwt.sign(
+          { id: newUser.id, isAdmin: newUser.isAdmin },
+          process.env.JWT_SECRET as string
+        );
+        const { password, ...rest } = newUser;
+
+        res
+          .status(200)
+          .cookie("access_token", token, {
+            httpOnly: true,
+          })
+          .json(rest);
+      } else {
+        res.status(400).json({ message: "User creation failed" });
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};

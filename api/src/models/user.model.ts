@@ -18,7 +18,7 @@ const app = express();
 // Load environment variables
 dotenv.config({
   override: true,
-  path: path.join(__dirname, "../.env"),
+  path: path.join(__dirname, "../../.env"),
 });
 
 // PostgreSQL connection pool configuration

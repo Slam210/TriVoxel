@@ -1,9 +1,11 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { createUser } from "../models/user.model.js";
+import { errorHandler } from "../utils/error.js";
 
 export const signup = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<Response | undefined> => {
   try {
     const { username, email, password } = req.body;
@@ -15,12 +17,12 @@ export const signup = async (
       email === "" ||
       password === ""
     ) {
-      return res.status(400).json({ message: "All fields are required" });
+      next(errorHandler(400, "All fields are required"));
     }
     await createUser(username, email, password);
     res.json({ message: "User created successfully!" });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    next(error);
   }
   return undefined;
 };

@@ -4,7 +4,7 @@
   "description": "Steven Lam",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch api/src --exec tsx api/src/index.ts"
+    "dev": "nodemon --watch api/ --exec tsx api/index.ts"
   },
   "type": "module",
   "keywords": [],

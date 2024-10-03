@@ -1,10 +1,10 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
 import path from "path";
 import { fileURLToPath } from "url"; // Simulate __dirname in ES modules
 import pg from "pg";
 import dotenv from "dotenv";
-import userRoutes from "./routes/user.route.js";
-import authRoutes from "./routes/auth.route.js";
+import userRoutes from "./src/routes/user.route.js";
+import authRoutes from "./src/routes/auth.route.js";
 
 // Simulate __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -51,6 +51,22 @@ app.listen(3000, () => {
   console.log("Server is running on port 3000");
 });
 
+// Define an interface for custom error
+interface CustomError extends Error {
+  statusCode?: number;
+}
+
 // Set up routes
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
+
+app.use((err: CustomError, req: Request, res: Response, next: NextFunction) => {
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+  });
+});

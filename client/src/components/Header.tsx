@@ -10,7 +10,6 @@ export default function Header() {
   const { currentUser } = useSelector((state: any) => state.user);
   const dispatch = useDispatch();
   const { theme } = useSelector((state: any) => state.theme);
-  console.log(currentUser);
   return (
     <Navbar className="border-b-2  border-gray-500">
       <Link

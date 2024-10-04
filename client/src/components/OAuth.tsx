@@ -35,7 +35,7 @@ const OAuth: any = () => {
     <div className="mt-4">
       <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
         <button
-          className="w-full bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 text-white px-4 py-2 rounded-lg"
+          className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg"
           onClick={handleGoogleClick}
           type="button"
         >

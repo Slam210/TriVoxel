@@ -88,45 +88,39 @@ export default function Signup() {
         <div className="flex-1">
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1 my-2">
-              <label htmlFor="username" className="text-white">
-                Your Username
-              </label>{" "}
+              <label htmlFor="username">Your Username</label>{" "}
               <input
                 type="text"
                 placeholder="Username"
-                className="w-full bg-gray-900 rounded-lg"
+                className="w-full dark:bg-gray-900 rounded-lg"
                 id="username"
                 onChange={handleChange}
               />
             </div>
             <div className="flex flex-col gap-1 my-2">
-              <label htmlFor="email" className="text-white">
-                Your Email
-              </label>{" "}
+              <label htmlFor="email">Your Email</label>{" "}
               <input
                 type="email"
                 placeholder="Email"
-                className="w-full bg-gray-900 rounded-lg"
+                className="w-full dark:bg-gray-900 rounded-lg"
                 id="email"
                 onChange={handleChange}
               />
             </div>
             <div className="flex flex-col gap-1 my-2">
-              <label htmlFor="password" className="text-white">
-                Your Password
-              </label>
+              <label htmlFor="password">Your Password</label>
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full bg-gray-900 rounded-lg"
+                className="w-full dark:bg-gray-900 rounded-lg"
                 id="password"
                 onChange={handleChange}
               />
             </div>
             <div className="mt-4">
-              <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
+              <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg text-center">
                 <button
-                  className="w-full bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 text-white px-4 py-2 rounded-lg"
+                  className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400px-4 py-2 rounded-lg text-center"
                   disabled={loading}
                 >
                   {loading ? (

@@ -22,7 +22,7 @@ export default function Dashboard(): JSX.Element {
         <DashSidebar />
       </div>
       {/* Right Side */}
-      <div>{tab === "profile" && <DashProfile />}</div>
+      {tab === "profile" && <DashProfile />}
     </div>
   );
 }

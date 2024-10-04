@@ -113,7 +113,7 @@ export const google = async (
     if (user) {
       // If user exists, generate JWT token
       const token = jwt.sign(
-        { id: user.id, isAdmin: user.isAdmin },
+        { id: user.user_id, isAdmin: user.isAdmin },
         process.env.JWT_SECRET as string
       );
       const { password, ...rest } = user;

@@ -5,6 +5,7 @@ import pg from "pg";
 import dotenv from "dotenv";
 import userRoutes from "./src/routes/user.route.js";
 import authRoutes from "./src/routes/auth.route.js";
+import cookieParser from "cookie-parser";
 
 // Simulate __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +17,7 @@ const { Pool } = pg;
 // Initialize Express
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // Load environment variables
 dotenv.config({

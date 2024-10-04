@@ -58,7 +58,7 @@ export default function DashProfile(): JSX.Element {
           setImageFileUploadProgress(Math.round(progress));
         },
 
-        (error) => {
+        (_error) => {
           setImageFileUploadError(
             "Could not upload image (File must be less than 2MB)"
           );

@@ -53,7 +53,6 @@ export const createUser = async (
     `;
     await pool.query(insertUserQuery, [username, email, hashedPassword]);
 
-    console.log("User created:", username);
     return true; // User creation successful
   } catch (err) {
     console.error("Error creating user:", err);
@@ -81,4 +80,58 @@ export const findUser = async (email: string = ""): Promise<any | null> => {
     console.error("Error finding user:", error);
     throw new Error("Database query failed");
   }
+};
+
+// Function to update the user in the database
+export const updateUserInDatabase = async (
+  userId: string,
+  updatedFields: {
+    username?: string;
+    email?: string;
+    profilePicture?: string;
+    password?: string;
+  }
+): Promise<any> => {
+  // Create an array to hold the fields to update and their corresponding values
+  const fieldsToUpdate: string[] = [];
+  const values: any[] = [];
+
+  // Add the fields to the update query only if they are provided
+  if (updatedFields.username) {
+    fieldsToUpdate.push("username = $1");
+    values.push(updatedFields.username);
+  }
+  if (updatedFields.email) {
+    fieldsToUpdate.push("email = $" + (values.length + 1));
+    values.push(updatedFields.email);
+  }
+  if (updatedFields.profilePicture) {
+    fieldsToUpdate.push("profile_picture = $" + (values.length + 1));
+    values.push(updatedFields.profilePicture);
+  }
+  if (updatedFields.password) {
+    fieldsToUpdate.push("password = $" + (values.length + 1));
+    values.push(updatedFields.password);
+  }
+
+  // Throw an error if no valid fields are provided
+  if (fieldsToUpdate.length === 0) {
+    throw new Error("No valid fields to update");
+  }
+
+  // Construct the dynamic update query
+  const updateUserQuery = `
+    UPDATE users
+    SET ${fieldsToUpdate.join(", ")}, updated_at = NOW()
+    WHERE user_id = $${values.length + 1}
+    RETURNING user_id, username, email, profile_picture, created_at, updated_at;
+  `;
+
+  // Add the userId to the values array
+  values.push(userId);
+
+  // Execute the query
+  const result = await pool.query(updateUserQuery, values);
+
+  return result.rows[0];
 };

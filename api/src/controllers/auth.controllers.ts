@@ -80,7 +80,7 @@ export const signin = async (
 
     // Generate a token
     const token = jwt.sign(
-      { id: validUser._id, isAdmin: validUser.isAdmin },
+      { id: validUser.user_id, isAdmin: validUser.isAdmin },
       process.env.JWT_SECRET as string
     );
 

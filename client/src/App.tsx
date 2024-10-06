@@ -1,8 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Signin from "./pages/Signin";
-import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import Header from "./components/Header";
@@ -11,6 +9,7 @@ import Resumes from "./pages/Resumes";
 import Blogs from "./pages/Blogs";
 import Tutorials from "./pages/Tutorials";
 import PrivateRoute from "./components/PrivateRoute";
+import SignInSignUp from "./pages/SignInSignUpProcess/SignInSignUp";
 
 export default function App() {
   return (
@@ -18,9 +17,9 @@ export default function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/test" />
         <Route path="/about" element={<About />} />
-        <Route path="/sign-in" element={<Signin />} />
-        <Route path="/sign-up" element={<Signup />} />
+        <Route path="/start" element={<SignInSignUp isSignInBool={true} />} />
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" element={<Projects />} />

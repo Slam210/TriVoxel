@@ -1,6 +1,6 @@
 import { Alert, Spinner } from "flowbite-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import OAuth from "../../components/OAuth";
 
 // Define an interface for form data
@@ -19,7 +19,6 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
   const [formData, setFormData] = useState<FormData>({});
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const navigate = useNavigate();
   const handleChange = (e: {
     target: {
       id: any;
@@ -52,7 +51,9 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
         setErrorMessage(data.message);
       }
       if (res.ok) {
-        navigate("/start");
+        setErrorMessage(null);
+        setLoading(false);
+        onSwitch();
       }
     } catch (error: any) {
       const typedError = error as CustomError;
@@ -68,14 +69,14 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
     <div className="md:mt-20 min-h-screen">
       <div className="flex p-3 max-w-7xl mx-auto flex-col gap-4 md:flex-row md:items-center ">
         {/* Right */}
-        <div className="flex-1 ml-8 w-full">
+        <div className="flex-1 w-full">
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1 my-2">
               <label htmlFor="username">Your Username</label>{" "}
               <input
                 type="text"
                 placeholder="Username"
-                className="w-full dark:bg-gray-900 rounded-lg"
+                className="w-full dark:bg-gray-900 rounded-lg max-w-xl"
                 id="username"
                 onChange={handleChange}
               />
@@ -85,7 +86,7 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
               <input
                 type="email"
                 placeholder="Email"
-                className="w-full dark:bg-gray-900 rounded-lg"
+                className="w-full dark:bg-gray-900 rounded-lg max-w-xl"
                 id="email"
                 onChange={handleChange}
               />
@@ -95,15 +96,15 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
               <input
                 type="password"
                 placeholder="Password"
-                className="w-full dark:bg-gray-900 rounded-lg"
+                className="w-full dark:bg-gray-900 rounded-lg max-w-xl"
                 id="password"
                 onChange={handleChange}
               />
             </div>
             <div className="mt-4">
-              <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg text-center">
+              <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg text-center max-w-xl">
                 <button
-                  className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg text-center"
+                  className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg text-center max-w-xl"
                   disabled={loading}
                 >
                   {loading ? (

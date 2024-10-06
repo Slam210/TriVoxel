@@ -70,7 +70,7 @@ export default function Signin({ onSwitch }: { onSwitch: () => void }) {
 
   return (
     <div className="md:mt-20 min-h-screen">
-      <div className="flex p-3 mx-auto flex-col gap-4 md:flex-row md:items-center">
+      <div className="flex p-3 max-w-7xl mx-auto flex-col gap-4 md:flex-row md:items-center ">
         {/* Left */}
         <div className="hidden md:flex flex-col text-center w-full md:w-1/2 justify-center items-center">
           <div className="flex">
@@ -96,7 +96,7 @@ export default function Signin({ onSwitch }: { onSwitch: () => void }) {
               <input
                 type="email"
                 placeholder="email@gmail.com"
-                className="w-full bg-white dark:bg-gray-900 rounded-lg"
+                className="w-full bg-white dark:bg-gray-900 rounded-lg max-w-xl"
                 id="email"
                 onChange={handleChange}
               />
@@ -106,15 +106,15 @@ export default function Signin({ onSwitch }: { onSwitch: () => void }) {
               <input
                 type="password"
                 placeholder="********"
-                className="w-full bg-white dark:bg-gray-900 rounded-lg"
+                className="w-full bg-white dark:bg-gray-900 rounded-lg max-w-xl"
                 id="password"
                 onChange={handleChange}
               />
             </div>
             <div className="mt-4">
-              <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
+              <div className="bg-gradient-to-tr max-w-xl from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
                 <button
-                  className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg"
+                  className="w-full max-w-xl bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg"
                   disabled={loading}
                 >
                   {loading ? (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Signin from "./Signin";
 import Signup from "./Signup";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
@@ -11,19 +11,23 @@ export default function SignInSignUp({
 }) {
   const [isSignIn, setIsSignIn] = useState(isSignInBool);
 
+  // Create a ref for the node inside CSSTransition
+  const nodeRef = useRef(null);
+
   const handleSwitch = () => {
     setIsSignIn(!isSignIn);
   };
 
   return (
-    <div className="min-h-screen max-w-7xl">
+    <div className="min-h-screen max-w-full">
       <SwitchTransition>
         <CSSTransition
+          nodeRef={nodeRef}
           key={isSignIn ? "signIn" : "signUp"}
           timeout={300}
           classNames="fade"
         >
-          <div>
+          <div ref={nodeRef}>
             {isSignIn ? (
               <Signin onSwitch={handleSwitch} />
             ) : (

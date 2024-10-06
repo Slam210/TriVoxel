@@ -1,7 +1,10 @@
 import { NextFunction } from "express";
 import { errorHandler } from "../utils/error.js";
 import bcrypt from "bcryptjs";
-import { updateUserInDatabase } from "../models/user.model.js";
+import {
+  updateUserInDatabase,
+  deleteUserInDatabase,
+} from "../models/user.model.js";
 
 export const test = (req: any, res: any) => {
   res.json({ message: "API is working" });
@@ -49,6 +52,22 @@ export const updateUser = async (req: any, res: any, next: NextFunction) => {
 
     const { password, ...rest } = updatedUser;
     res.status(200).json(rest);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteUser = async (req: any, res: any, next: NextFunction) => {
+  if (Number(req.user.id) !== Number(req.params.userId)) {
+    return next(errorHandler(403, "You are not allowed to update this user"));
+  }
+  try {
+    console.log(Number(req.user.id), Number(req.params.userId));
+    const result = await deleteUserInDatabase(req.params.userId);
+    if (!result) {
+      return next(errorHandler(404, "User not found"));
+    }
+    res.status(200).json("User has been deleted");
   } catch (error) {
     next(error);
   }

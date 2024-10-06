@@ -135,3 +135,30 @@ export const updateUserInDatabase = async (
 
   return result.rows[0];
 };
+
+// Function to delete a user by ID
+export const deleteUserInDatabase = async (
+  userId: string
+): Promise<boolean> => {
+  try {
+    // Query to delete the user by their ID
+    const deleteUserQuery = `
+      DELETE FROM users WHERE user_id = $1 RETURNING user_id;
+    `;
+
+    // Execute the query
+    const result: any = await pool.query(deleteUserQuery, [userId]);
+
+    // Check if any row was affected (i.e., user was found and deleted)
+    if (result.rowCount > 0) {
+      console.log(`User with ID ${userId} has been deleted.`);
+      return true; // Return true if the user was deleted
+    } else {
+      console.log(`User with ID ${userId} not found.`);
+      return false; // Return false if no user was found
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw new Error("User deletion failed due to a database error");
+  }
+};

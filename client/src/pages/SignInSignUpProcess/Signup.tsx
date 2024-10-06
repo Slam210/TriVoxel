@@ -52,7 +52,7 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
         setErrorMessage(data.message);
       }
       if (res.ok) {
-        navigate("/sign-in");
+        navigate("/start");
       }
     } catch (error: any) {
       const typedError = error as CustomError;

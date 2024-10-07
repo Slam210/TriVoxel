@@ -10,6 +10,8 @@ import Blogs from "./pages/Blogs";
 import Tutorials from "./pages/Tutorials";
 import PrivateRoute from "./components/PrivateRoute";
 import SignInSignUp from "./pages/SignInSignUpProcess/SignInSignUp";
+import CreatePost from "./pages/CreatePost";
+import RolePrivateRoute from "./components/RolePrivateRoute";
 
 export default function App() {
   return (
@@ -26,6 +28,9 @@ export default function App() {
           <Route path="/resumes" element={<Resumes />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/tutorials" element={<Tutorials />} />
+          <Route element={<RolePrivateRoute />}>
+            <Route path="/create-post" element={<CreatePost />} />
+          </Route>
         </Route>
       </Routes>
       <FooterCom />

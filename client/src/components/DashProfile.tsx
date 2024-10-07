@@ -21,14 +21,16 @@ import {
 } from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import { Link } from "react-router-dom";
 
 interface UserState {
   user: {
     currentUser: {
-      user_id: number;
+      id: number;
       profile_picture: string;
       username: string;
       email: string;
+      roleid: string;
     };
     error: any;
     loading: any;
@@ -126,7 +128,7 @@ export default function DashProfile(): JSX.Element {
     }
     try {
       dispatch(updateStart());
-      const res = await fetch(`/api/user/update/${currentUser.user_id}`, {
+      const res = await fetch(`/api/user/update/${currentUser.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -151,7 +153,7 @@ export default function DashProfile(): JSX.Element {
     setShowModal(false);
     try {
       dispatch(deleteUserStart());
-      const res = await fetch(`/api/user/delete/${currentUser.user_id}`, {
+      const res = await fetch(`/api/user/delete/${currentUser.id}`, {
         method: "DELETE",
       });
       const data = await res.json();
@@ -268,6 +270,18 @@ export default function DashProfile(): JSX.Element {
             {loading ? "Loading..." : "Update"}
           </button>
         </div>
+        {currentUser.roleid && currentUser.roleid === "admin" && (
+          <Link to={"/create-post"}>
+            <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
+              <button
+                className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg"
+                disabled={loading || imageFileUploading}
+              >
+                Create a Post
+              </button>
+            </div>
+          </Link>
+        )}
       </form>
       <div className="text-red-500 flex justify-between w-full m-5">
         <span

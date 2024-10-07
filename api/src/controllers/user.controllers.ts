@@ -62,7 +62,6 @@ export const deleteUser = async (req: any, res: any, next: NextFunction) => {
     return next(errorHandler(403, "You are not allowed to update this user"));
   }
   try {
-    console.log(Number(req.user.id), Number(req.params.userId));
     const result = await deleteUserInDatabase(req.params.userId);
     if (!result) {
       return next(errorHandler(404, "User not found"));

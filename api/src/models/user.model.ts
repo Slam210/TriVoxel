@@ -47,11 +47,16 @@ export const createUser = async (
 
     // Insert new user into the database
     const insertUserQuery = `
-      INSERT INTO users (username, email, password, created_at, updated_at)
-      VALUES ($1, $2, $3, DEFAULT, DEFAULT)
+      INSERT INTO users (username, email, password, profile_picture, roleId, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, 'user',DEFAULT, DEFAULT)
       RETURNING *;
     `;
-    await pool.query(insertUserQuery, [username, email, hashedPassword]);
+    await pool.query(insertUserQuery, [
+      username,
+      email,
+      hashedPassword,
+      "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png",
+    ]);
 
     return true; // User creation successful
   } catch (err) {
@@ -123,8 +128,8 @@ export const updateUserInDatabase = async (
   const updateUserQuery = `
     UPDATE users
     SET ${fieldsToUpdate.join(", ")}, updated_at = NOW()
-    WHERE user_id = $${values.length + 1}
-    RETURNING user_id, username, email, profile_picture, created_at, updated_at;
+    WHERE id = $${values.length + 1}
+    RETURNING id, username, email, profile_picture, created_at, updated_at;
   `;
 
   // Add the userId to the values array
@@ -143,7 +148,7 @@ export const deleteUserInDatabase = async (
   try {
     // Query to delete the user by their ID
     const deleteUserQuery = `
-      DELETE FROM users WHERE user_id = $1 RETURNING user_id;
+      DELETE FROM users WHERE id = $1 RETURNING id;
     `;
 
     // Execute the query

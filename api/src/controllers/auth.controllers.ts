@@ -80,7 +80,7 @@ export const signin = async (
 
     // Generate a token
     const token = jwt.sign(
-      { id: validUser.user_id, isAdmin: validUser.isAdmin },
+      { id: validUser.id, roleId: validUser.roleId },
       process.env.JWT_SECRET as string
     );
 
@@ -113,7 +113,7 @@ export const google = async (
     if (user) {
       // If user exists, generate JWT token
       const token = jwt.sign(
-        { id: user.user_id, isAdmin: user.isAdmin },
+        { id: user.id, roleId: user.roleId },
         process.env.JWT_SECRET as string
       );
       const { password, ...rest } = user;
@@ -143,7 +143,7 @@ export const google = async (
         // Fetch the new user after successful creation
         const newUser = await findUser(email);
         const token = jwt.sign(
-          { id: newUser.id, isAdmin: newUser.isAdmin },
+          { id: newUser.id, roleId: newUser.roleId },
           process.env.JWT_SECRET as string
         );
         const { password, ...rest } = newUser;

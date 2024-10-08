@@ -3,17 +3,35 @@ import { errorHandler } from "../utils/error.js";
 import { createPost } from "../models/post.model.js";
 
 export const create = async (req: any, res: any, next: NextFunction) => {
-  // Check if the user is authenticated and an admin
-  if (!req.user || req.user.roleId !== "admin") {
-    return next(errorHandler(403, "You are not allowed to create a post"));
+  // Check if the user is authenticated
+  if (!req.user) {
+    return next(
+      errorHandler(403, "You are not authenticated to create a post")
+    );
   }
 
-  // Extract fields from the request body and the file
   const { title, content, category, subtitle, cover_image } = req.body;
 
   // Validate required fields
   if (!title || !content) {
     return next(errorHandler(400, "Please provide all required fields"));
+  }
+
+  // Role-based access control
+  const { roleId } = req.user;
+
+  // Determine allowed categories based on role
+  const allowedCategories: Record<string, string[]> = {
+    admin: ["tutorials", "blogs", "resume"],
+    contributor: ["tutorials", "blogs", "resume"],
+    verifieduser: ["blogs", "resume"],
+    user: ["resume"],
+  };
+  // Check if the user's role is allowed to create the specified category
+  if (!allowedCategories[roleId]?.includes(category)) {
+    return next(
+      errorHandler(403, "You are not allowed to create a post in this category")
+    );
   }
 
   // Generate slug from the title

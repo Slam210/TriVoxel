@@ -270,18 +270,21 @@ export default function DashProfile(): JSX.Element {
             {loading ? "Loading..." : "Update"}
           </button>
         </div>
-        {currentUser.roleid && currentUser.roleid === "admin" && (
-          <Link to={"/create-post"}>
-            <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
-              <button
-                className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg"
-                disabled={loading || imageFileUploading}
-              >
-                Create a Post
-              </button>
-            </div>
-          </Link>
-        )}
+        {currentUser.roleid &&
+          (currentUser.roleid === "admin" ||
+            currentUser.roleid === "contributor" ||
+            currentUser.roleid === "verifieduser") && (
+            <Link to={"/create-post"}>
+              <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
+                <button
+                  className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg"
+                  disabled={loading || imageFileUploading}
+                >
+                  Create a Post
+                </button>
+              </div>
+            </Link>
+          )}
       </form>
       <div className="text-red-500 flex justify-between w-full m-5">
         <span

@@ -10,6 +10,15 @@ import {
   uploadBytesResumable,
 } from "firebase/storage"; // Import Firebase Storage functions
 import { app } from "../firebase"; // Import your Firebase app
+import { useSelector } from "react-redux";
+
+interface UserState {
+  user: {
+    currentUser: {
+      roleid: string;
+    };
+  };
+}
 
 export default function CreatePost() {
   const navigate = useNavigate(); // Initialize navigation
@@ -26,6 +35,7 @@ export default function CreatePost() {
     subtitle: "",
     coverImage: null,
   });
+  const { currentUser } = useSelector((state: UserState) => state.user);
 
   const [publishError, setPublishError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -115,6 +125,14 @@ export default function CreatePost() {
         coverImageUrl = await handleImageUpload(coverImage); // Upload and get URL
       }
 
+      // Check if content is empty or just <p><br></p>
+      const contentIsEmpty =
+        !formData.content || formData.content === "<p><br></p>";
+      if (contentIsEmpty) {
+        setPublishError("Content cannot be empty.");
+        return;
+      }
+
       // Include the image URL in the data to submit
       const payload = { ...dataToSubmit, cover_image: coverImageUrl };
 
@@ -160,11 +178,24 @@ export default function CreatePost() {
             onChange={(e) =>
               setFormData({ ...formData, category: e.target.value })
             }
+            required
           >
-            <option value="uncategorized">Select a category</option>
-            <option value="tutorials">Tutorial</option>
-            <option value="blogs">Blog</option>
-            <option value="resume">Resume</option>
+            <option value="">Select a category</option>
+            {(currentUser.roleid === "admin" ||
+              currentUser.roleid === "contributor") && (
+              <option value="tutorials">Tutorial</option>
+            )}
+            {(currentUser.roleid === "admin" ||
+              currentUser.roleid === "contributor" ||
+              currentUser.roleid === "verifieduser") && (
+              <option value="blogs">Blog</option>
+            )}
+            {(currentUser.roleid === "admin" ||
+              currentUser.roleid === "contributor" ||
+              currentUser.roleid === "verifieduser" ||
+              currentUser.roleid === "user") && (
+              <option value="resume">Resume</option>
+            )}
           </Select>
         </div>
 
@@ -176,6 +207,7 @@ export default function CreatePost() {
           onChange={(e) =>
             setFormData({ ...formData, subtitle: e.target.value })
           }
+          required
         />
 
         {/* Input for cover image */}
@@ -184,6 +216,7 @@ export default function CreatePost() {
           accept="image/*"
           onChange={handleFileChange}
           className="rounded"
+          required
         />
 
         {/* Image preview */}
@@ -198,7 +231,9 @@ export default function CreatePost() {
         {/* React Quill for rich text content */}
         <ReactQuill
           value={formData.content || ""}
-          onChange={(content) => setFormData({ ...formData, content })}
+          onChange={(content) => {
+            setFormData({ ...formData, content });
+          }}
           modules={modules}
           formats={formats}
           placeholder="Start typing your post content here..."

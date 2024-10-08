@@ -80,9 +80,10 @@ export const signin = async (
 
     // Generate a token
     const token = jwt.sign(
-      { id: validUser.id, roleId: validUser.roleId },
+      { id: validUser.id, roleId: validUser.roleid },
       process.env.JWT_SECRET as string
     );
+    console.log(validUser.roleid);
 
     // Exclude the password from the response
     const { password: pass, ...rest } = validUser;

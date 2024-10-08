@@ -1,36 +1,51 @@
-import { Alert, Button, Select, TextInput } from "flowbite-react";
+import { Alert, Select, TextInput } from "flowbite-react";
 import React, { useState } from "react";
 import ReactQuill from "react-quill-new"; // Import react-quill-new
 import "react-quill-new/dist/quill.snow.css"; // Import the Quill CSS
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage"; // Import Firebase Storage functions
+import { app } from "../firebase"; // Import your Firebase app
 
 export default function CreatePost() {
+  const navigate = useNavigate(); // Initialize navigation
   const [formData, setFormData] = useState<{
     title?: string;
     category?: string;
     content: string;
+    subtitle?: string;
+    coverImage?: File | null; // File type for the uploaded image
   }>({
     title: "",
     category: "",
-    content: "", // Initialize content as an empty string
+    content: "",
+    subtitle: "",
+    coverImage: null,
   });
+
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const modules = {
     toolbar: [
-      ["bold", "italic", "underline", "strike"], // toggled buttons
+      ["bold", "italic", "underline", "strike"],
       ["blockquote", "code-block"],
-      [{ header: 1 }, { header: 2 }], // custom button values
+      [{ header: 1 }, { header: 2 }],
       [{ list: "ordered" }, { list: "bullet" }],
-      [{ script: "sub" }, { script: "super" }], // superscript/subscript
-      [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
-      [{ direction: "rtl" }], // text direction
-      [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+      [{ script: "sub" }, { script: "super" }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ direction: "rtl" }],
+      [{ size: ["small", false, "large", "huge"] }],
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+      [{ color: [] }, { background: [] }],
       [{ font: [] }],
       [{ align: [] }],
       ["link", "image"],
-      ["clean"], // remove formatting button
+      ["clean"],
     ],
   };
 
@@ -52,33 +67,77 @@ export default function CreatePost() {
     "underline",
   ];
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const file = e.target.files[0];
+      setFormData({ ...formData, coverImage: file }); // Get the first file
+      setImagePreview(URL.createObjectURL(file)); // Create a preview URL
+    }
+  };
+
+  const handleImageUpload = async (file: File): Promise<string | null> => {
+    const storage = getStorage(app);
+    const storageRef = ref(storage, `${Date.now()}-${file.name}`);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise((resolve, reject) => {
+      uploadTask.on(
+        "state_changed",
+        null,
+        (error) => {
+          console.error("Image upload failed", error);
+          reject("Image upload failed");
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref)
+            .then((downloadURL) => {
+              resolve(downloadURL);
+            })
+            .catch((error) => {
+              console.error("Failed to get download URL", error);
+              reject("Failed to get image URL");
+            });
+        }
+      );
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPublishError(null); // Clear any existing error
 
-    if (!formData.content || formData.content.trim() === "") {
-      setPublishError("Content is required.");
-      return;
-    }
+    const { coverImage, ...dataToSubmit } = formData;
 
     try {
+      // Handle the cover image upload
+      let coverImageUrl: string | null = null;
+      if (coverImage) {
+        coverImageUrl = await handleImageUpload(coverImage); // Upload and get URL
+      }
+
+      // Include the image URL in the data to submit
+      const payload = { ...dataToSubmit, cover_image: coverImageUrl };
+
       const res = await fetch("/api/post/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload), // Send the JSON payload
       });
 
       const data = await res.json();
       if (!res.ok) {
-        setPublishError(data.message || "Failed to create the post.");
+        setPublishError(data.message);
         return;
       }
 
-      setFormData({ title: "", category: "", content: "" });
+      if (res.ok) {
+        setPublishError(null);
+        navigate(`/post/${data.slug}`); // Navigate to the created post
+      }
     } catch (error) {
-      setPublishError("An unexpected error occurred. Please try again.");
+      setPublishError("Something went wrong");
     }
   };
 
@@ -109,6 +168,33 @@ export default function CreatePost() {
           </Select>
         </div>
 
+        <TextInput
+          type="text"
+          placeholder="Subtitle"
+          id="subtitle"
+          className="flex-1"
+          onChange={(e) =>
+            setFormData({ ...formData, subtitle: e.target.value })
+          }
+        />
+
+        {/* Input for cover image */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="rounded"
+        />
+
+        {/* Image preview */}
+        {imagePreview && (
+          <img
+            src={imagePreview}
+            alt="Cover Preview"
+            className="mt-4 border rounded max-w-full h-auto"
+          />
+        )}
+
         {/* React Quill for rich text content */}
         <ReactQuill
           value={formData.content || ""}
@@ -118,9 +204,14 @@ export default function CreatePost() {
           placeholder="Start typing your post content here..."
         />
 
-        <Button type="submit" gradientDuoTone="purpleToPink">
-          Publish
-        </Button>
+        <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
+          <button
+            className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg"
+            type="submit"
+          >
+            Publish
+          </button>
+        </div>
 
         {publishError && (
           <Alert className="mt-5" color="failure">

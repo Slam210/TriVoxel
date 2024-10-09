@@ -65,7 +65,6 @@ export default function DashSidebar() {
             to="/dashboard?tab=posts"
             active={tab === "posts"}
             icon={HiDocumentText}
-            label={"Posts"}
             labelColor="dark"
             className="cursor-pointer"
           >

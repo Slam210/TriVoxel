@@ -67,3 +67,66 @@ export const createPost = async (
     throw new Error("Post creation failed due to a database error");
   }
 };
+
+// Query to get posts with filters, sorting, and pagination
+export const fetchPosts = async (
+  startIndex: number,
+  limit: number,
+  sortDirection: string,
+  filters: string[],
+  queryParams: any[]
+) => {
+  const filterQuery = filters.length ? `WHERE ${filters.join(" AND ")}` : "";
+
+  const postsQuery = `
+    SELECT * FROM posts
+    ${filterQuery}
+    ORDER BY "updated_at" ${sortDirection}
+    OFFSET $${queryParams.length + 1} LIMIT $${queryParams.length + 2};
+  `;
+
+  queryParams.push(startIndex, limit);
+
+  const result = await pool.query(postsQuery, queryParams);
+  return result.rows;
+};
+
+// Query to count total posts
+export const countTotalPosts = async () => {
+  const totalPostsQuery = `SELECT COUNT(*) FROM posts;`;
+  const result = await pool.query(totalPostsQuery);
+  return parseInt(result.rows[0].count);
+};
+
+// Query to count posts created within the last month
+export const countLastMonthPosts = async (oneMonthAgo: Date) => {
+  const lastMonthPostsQuery = `
+    SELECT COUNT(*) FROM posts WHERE "created_at" >= $1;
+  `;
+  const result = await pool.query(lastMonthPostsQuery, [oneMonthAgo]);
+  return parseInt(result.rows[0].count);
+};
+
+// Query to get posts by userId and allowed categories
+export const fetchUserPosts = async (
+  userId: string,
+  startIndex: number,
+  limit: number,
+  sortDirection: string,
+  allowedCategories: string[] // Pass the allowed categories based on the role
+) => {
+  const postsQuery = `
+    SELECT * FROM posts
+    WHERE "userid" = $1 AND category = ANY($4)
+    ORDER BY "updated_at" ${sortDirection}
+    OFFSET $2 LIMIT $3;
+  `;
+
+  const result = await pool.query(postsQuery, [
+    userId,
+    startIndex,
+    limit,
+    allowedCategories,
+  ]);
+  return result.rows;
+};

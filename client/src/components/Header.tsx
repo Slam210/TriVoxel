@@ -106,14 +106,39 @@ export default function Header() {
         <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
-        <Navbar.Link active={path === "/tutorials"} as={"div"}>
-          <Link to="/tutorials">Tutorials</Link>
+        <Navbar.Link active={path === "/tutorials"} as={Link} to="/tutorials">
+          <span
+            className={`${
+              path === "/tutorials" ? "text-black " : "text-gray-500"
+            } hover:text-black dark:${
+              path === "/tutorials" ? "text-white" : "text-gray-500"
+            }  dark:hover:text-white`}
+          >
+            Tutorials
+          </span>
         </Navbar.Link>
-        <Navbar.Link active={path === "/blogs"} as={"div"}>
-          <Link to="/blogs">Blogs</Link>
+
+        <Navbar.Link active={path === "/blogs"} as={Link} to="/blogs">
+          <span
+            className={`${
+              path === "/blogs" ? "text-black " : "text-gray-500"
+            } hover:text-black dark:${
+              path === "/blogs" ? "text-white" : "text-gray-500"
+            }  dark:hover:text-white`}
+          >
+            Blogs
+          </span>
         </Navbar.Link>
-        <Navbar.Link active={path === "/resumes"} as={"div"}>
-          <Link to="/resumes">Resumes</Link>
+        <Navbar.Link active={path === "/resumes"} as={Link} to="/resumes">
+          <span
+            className={`${
+              path === "/resumes" ? "text-black " : "text-gray-500"
+            } hover:text-black dark:${
+              path === "/resumes" ? "text-white" : "text-gray-500"
+            }  dark:hover:text-white`}
+          >
+            Resumes
+          </span>
         </Navbar.Link>
       </Navbar.Collapse>
     </Navbar>

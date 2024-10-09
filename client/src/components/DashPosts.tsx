@@ -37,7 +37,9 @@ export default function DashPosts() {
         const data = await res.json();
         if (res.ok) {
           setUserPosts(data.posts);
-          console.log(data.posts);
+          if (data.posts.length < 9) {
+            setShowMore(false);
+          }
         }
       } catch (error: any) {
         console.log(error.message);
@@ -55,8 +57,23 @@ export default function DashPosts() {
     }
   }, [currentUser.id]);
 
-  const handleShowMore = () => {};
-
+  const handleShowMore = async () => {
+    const startIndex = userPosts.length;
+    try {
+      const res = await fetch(
+        `/api/post/getuserposts?startIndex=${startIndex}`
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setUserPosts((prev) => [...prev, ...data.posts]);
+        if (data.posts.length < 9) {
+          setShowMore(false);
+        }
+      }
+    } catch (error: any) {
+      console.log(error.message);
+    }
+  };
   const handleDeletePost = () => {};
 
   return (

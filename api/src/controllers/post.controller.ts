@@ -6,6 +6,7 @@ import {
   countTotalPosts,
   countLastMonthPosts,
   fetchUserPosts,
+  deleteUserPost,
 } from "../models/post.model.js";
 
 export const create = async (req: any, res: any, next: NextFunction) => {
@@ -217,6 +218,23 @@ export const getUserPosts = async (
     });
   } catch (error) {
     console.error("Error fetching user posts:", error);
+    next(error);
+  }
+};
+
+export const deletePost = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  const { postId } = req.params;
+  const { id: userId, roleId } = req.user;
+
+  try {
+    console.log(postId, userId, roleId);
+    await deleteUserPost(postId, userId, roleId);
+    res.status(200).json("The post has been deleted");
+  } catch (error) {
     next(error);
   }
 };

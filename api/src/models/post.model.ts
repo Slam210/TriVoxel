@@ -130,3 +130,43 @@ export const fetchUserPosts = async (
   ]);
   return result.rows;
 };
+
+// Query to delete a post
+export const deleteUserPost = async (
+  postId: string,
+  userId: string,
+  roleId: string
+) => {
+  try {
+    // Check if the user is an admin or the owner of the post
+    const userRoleQuery = `
+      SELECT id FROM posts WHERE id = $1;
+    `;
+    const postOwner = await pool.query(userRoleQuery, [postId]);
+
+    if (postOwner.rows.length === 0) {
+      throw new Error("Post not found");
+    }
+
+    const ownerId = postOwner.rows[0].userid;
+
+    if (roleId !== "admin" && ownerId !== userId) {
+      throw new Error("You are not allowed to delete this post");
+    }
+
+    // Proceed to delete the post
+    const deletePostQuery = `
+      DELETE FROM posts WHERE id = $1 RETURNING *;
+    `;
+    const result = await pool.query(deletePostQuery, [postId]);
+
+    if (result.rowCount === 0) {
+      throw new Error("Failed to delete post");
+    }
+
+    return true; // Indicate that the post was deleted successfully
+  } catch (err) {
+    console.error("Error deleting post:", err);
+    throw new Error("Post deletion failed due to a database error");
+  }
+};

@@ -123,25 +123,8 @@ export default function UpdatePost() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submitPost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setPublishError(null);
-
-    const editorData = editorInstance.getData();
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      content: editorData,
-    }));
-
-    if (!editorData || editorData === "<p><br></p>") {
-      setPublishError("Content cannot be empty.");
-      return;
-    }
-
-    await submitPost();
-  };
-
-  const submitPost = async () => {
     const { coverImage, ...dataToSubmit } = formData;
 
     try {
@@ -151,6 +134,11 @@ export default function UpdatePost() {
       }
 
       const payload = { ...dataToSubmit, cover_image: coverImageUrl };
+      payload.content = editorInstance.getData();
+      if (!payload.content || payload.content === "<p><br></p>") {
+        setPublishError("Content cannot be empty.");
+        return;
+      }
 
       const res = await fetch(
         `/api/post/updatepost/${formData.id}/${currentUser.id}`,
@@ -304,12 +292,12 @@ export default function UpdatePost() {
     if (postId) {
       fetchPost();
     }
-  }, [postId, editorInstance]); // Include editorInstance as a dependency
+  }, [postId, editorInstance]);
 
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
       <h1 className="text-center text-3xl my-7 font-semibold">Update Post</h1>
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4" onSubmit={submitPost}>
         <div className="flex flex-col gap-4 sm:flex-row justify-between">
           <TextInput
             type="text"

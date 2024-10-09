@@ -183,6 +183,26 @@ export const updatePostInDB = async (
   }
 ) => {
   try {
+    // If a new title is provided, generate a new slug
+    let newSlug: string | null = null;
+    if (updatedData.title) {
+      newSlug = generateSlug(updatedData.title);
+
+      // Check if the new slug already exists
+      const existingPostQuery = `
+        SELECT * FROM posts WHERE slug = $1 AND id != $2;
+      `;
+      const existingPost = await pool.query(existingPostQuery, [
+        newSlug,
+        postId,
+      ]);
+
+      if (existingPost.rows.length > 0) {
+        throw new Error("Slug already exists for another post");
+      }
+    }
+
+    // Update query with the new slug if the title has changed
     const updatePostQuery = `
       UPDATE posts
       SET title = COALESCE($1, title),
@@ -190,8 +210,9 @@ export const updatePostInDB = async (
           category = COALESCE($3, category),
           subtitle = COALESCE($4, subtitle),
           cover_image = COALESCE($5, cover_image),
+          slug = COALESCE($6, slug),  -- Update the slug if a new title was provided
           updated_at = DEFAULT
-      WHERE id = $6
+      WHERE id = $7
       RETURNING *;
     `;
 
@@ -201,6 +222,7 @@ export const updatePostInDB = async (
       updatedData.category,
       updatedData.subtitle,
       updatedData.coverImage,
+      newSlug, // Pass the new slug or keep it null if the title is not updated
       postId,
     ]);
 
@@ -209,4 +231,13 @@ export const updatePostInDB = async (
     console.error("Error updating post:", error);
     throw new Error("Post update failed due to a database error");
   }
+};
+
+// Utility function to generate slug
+const generateSlug = (title: string): string => {
+  return title
+    .split(" ")
+    .join("-")
+    .toLowerCase()
+    .replace(/[^a-zA-Z0-9-]/g, "");
 };

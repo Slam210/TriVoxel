@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Sidebar } from "flowbite-react";
-import { HiArrowSmRight, HiUser } from "react-icons/hi";
+import { HiArrowSmRight, HiDocumentText, HiUser } from "react-icons/hi";
 import { signoutSuccess } from "../redux/user/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
+interface UserState {
+  user: {
+    currentUser: {
+      roleid: string;
+    };
+  };
+}
 
 export default function DashSidebar() {
   const location = useLocation();
   const [tab, setTab] = useState<string | null>("");
   const dispatch = useDispatch();
-
+  const { currentUser } = useSelector((state: UserState) => state.user);
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabFromURL = urlParams.get("tab");
@@ -42,11 +50,26 @@ export default function DashSidebar() {
             to="/dashboard?tab=profile"
             active={tab === "profile"}
             icon={HiUser}
-            label={"User"}
+            label={
+              currentUser.roleid.charAt(0).toUpperCase() +
+              currentUser.roleid.slice(1)
+            }
             labelColor="dark"
             className="cursor-pointer"
           >
             Profile
+          </Sidebar.Item>
+
+          <Sidebar.Item
+            as={Link}
+            to="/dashboard?tab=posts"
+            active={tab === "posts"}
+            icon={HiDocumentText}
+            label={"Posts"}
+            labelColor="dark"
+            className="cursor-pointer"
+          >
+            Posts
           </Sidebar.Item>
 
           <Sidebar.Item

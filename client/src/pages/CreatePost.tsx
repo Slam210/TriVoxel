@@ -40,7 +40,6 @@ import {
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
 import "../css/ckeditor.css";
-import "../css/choosefile.css";
 
 interface UserState {
   user: {
@@ -234,15 +233,13 @@ export default function CreatePost() {
         },
       })
         .then((editor) => {
-          editorInstance = editor; // Save the editor instance for cleanup
-          console.log("Editor was initialized", editor);
+          editorInstance = editor;
         })
         .catch((error) => {
           console.error("There was a problem initializing the editor", error);
         });
     }
 
-    // Cleanup on unmount
     return () => {
       if (editorInstance) {
         editorInstance.destroy().catch((error: any) => {

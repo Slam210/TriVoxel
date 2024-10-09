@@ -4,6 +4,9 @@ import bcrypt from "bcryptjs";
 import {
   updateUserInDatabase,
   deleteUserInDatabase,
+  getUsersFromDatabase,
+  getUsersCount,
+  getLastMonthUsersCount,
 } from "../models/user.model.js";
 
 export const test = (req: any, res: any) => {
@@ -58,7 +61,10 @@ export const updateUser = async (req: any, res: any, next: NextFunction) => {
 };
 
 export const deleteUser = async (req: any, res: any, next: NextFunction) => {
-  if (Number(req.user.id) !== Number(req.params.userId)) {
+  if (
+    Number(req.user.id) !== Number(req.params.userId) &&
+    req.user.roleId !== "admin"
+  ) {
     return next(errorHandler(403, "You are not allowed to update this user"));
   }
   try {
@@ -79,4 +85,34 @@ export const signout = (req: any, res: any, next: NextFunction) => {
       .status(200)
       .json("User has been signed out");
   } catch (error) {}
+};
+
+export const getUsers = async (req: any, res: any, next: NextFunction) => {
+  if (req.user?.roleId !== "admin") {
+    return next(errorHandler(403, "You are not allowed to see all users"));
+  }
+
+  try {
+    const startIndex: number = parseInt(req.query.startIndex as string) || 0;
+    const limit: number = parseInt(req.query.limit as string) || 9;
+    const sortDirection: "asc" | "desc" =
+      req.query.sort === "asc" ? "asc" : "desc";
+
+    const users = await getUsersFromDatabase(startIndex, limit, sortDirection);
+    const usersWithoutPassword = users.map((user) => {
+      const { password, ...rest } = user;
+      return rest;
+    });
+
+    const totalUsers = await getUsersCount();
+    const lastMonthUsers = await getLastMonthUsersCount();
+
+    res.status(200).json({
+      users: usersWithoutPassword,
+      totalUsers,
+      lastMonthUsers,
+    });
+  } catch (error) {
+    next(error);
+  }
 };

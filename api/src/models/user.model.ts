@@ -8,6 +8,16 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  profile_picture: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
 // Load environment variables
 dotenv.config({
   override: true,
@@ -166,4 +176,49 @@ export const deleteUserInDatabase = async (
     console.error("Error deleting user:", error);
     throw new Error("User deletion failed due to a database error");
   }
+};
+
+// Fetch users with pagination and sorting
+export const getUsersFromDatabase = async (
+  startIndex: number,
+  limit: number,
+  sortDirection: "asc" | "desc"
+): Promise<User[]> => {
+  const query = `
+    SELECT id, username, email, roleId, profile_picture, created_at, updated_at
+    FROM users
+    ORDER BY created_at ${sortDirection === "asc" ? "ASC" : "DESC"}
+    OFFSET $1 LIMIT $2;
+  `;
+
+  const result = await pool.query(query, [startIndex, limit]);
+  return result.rows;
+};
+
+// Get total user count
+export const getUsersCount = async (): Promise<number> => {
+  const query = `
+    SELECT COUNT(*) FROM users;
+  `;
+
+  const result = await pool.query(query);
+  return parseInt(result.rows[0].count, 10);
+};
+
+// Get count of users created in the last month
+export const getLastMonthUsersCount = async (): Promise<number> => {
+  const now = new Date();
+  const oneMonthAgo = new Date(
+    now.getFullYear(),
+    now.getMonth() - 1,
+    now.getDate()
+  );
+
+  const query = `
+    SELECT COUNT(*) FROM users
+    WHERE created_at >= $1;
+  `;
+
+  const result = await pool.query(query, [oneMonthAgo]);
+  return parseInt(result.rows[0].count, 10);
 };

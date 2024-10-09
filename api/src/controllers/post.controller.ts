@@ -176,8 +176,6 @@ export const getUserPosts = async (
       return res.status(400).json({ error: "User ID is required" });
     }
 
-    console.log(userId);
-
     const startIndex = parseInt(req.query.startIndex as string) || 0;
     const limit = parseInt(req.query.limit as string) || 9;
     const sortDirection = req.query.order === "asc" ? "ASC" : "DESC";

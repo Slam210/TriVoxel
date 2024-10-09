@@ -73,4 +73,4 @@ export const theme = {
     },
   },
 };
-export const plugins = [plugin()];
+export const plugins = [plugin(), require("tailwind-scrollbar")];

@@ -170,3 +170,43 @@ export const deleteUserPost = async (
     throw new Error("Post deletion failed due to a database error");
   }
 };
+
+// Function to update a post
+export const updatePostInDB = async (
+  postId: string,
+  updatedData: {
+    title?: string;
+    content?: string;
+    category?: string;
+    subtitle?: string;
+    coverImage?: string | null;
+  }
+) => {
+  try {
+    const updatePostQuery = `
+      UPDATE posts
+      SET title = COALESCE($1, title),
+          content = COALESCE($2, content),
+          category = COALESCE($3, category),
+          subtitle = COALESCE($4, subtitle),
+          cover_image = COALESCE($5, cover_image),
+          updated_at = DEFAULT
+      WHERE id = $6
+      RETURNING *;
+    `;
+
+    const result = await pool.query(updatePostQuery, [
+      updatedData.title,
+      updatedData.content,
+      updatedData.category,
+      updatedData.subtitle,
+      updatedData.coverImage,
+      postId,
+    ]);
+
+    return result.rows[0] || null; // Return the updated post or null if not found
+  } catch (error) {
+    console.error("Error updating post:", error);
+    throw new Error("Post update failed due to a database error");
+  }
+};

@@ -7,6 +7,7 @@ import {
   countLastMonthPosts,
   fetchUserPosts,
   deleteUserPost,
+  updatePostInDB,
 } from "../models/post.model.js";
 
 export const create = async (req: any, res: any, next: NextFunction) => {
@@ -234,6 +235,40 @@ export const deletePost = async (
     console.log(postId, userId, roleId);
     await deleteUserPost(postId, userId, roleId);
     res.status(200).json("The post has been deleted");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updatepost = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  const { user } = req;
+  const { postId } = req.params;
+
+  // Check if the user is authorized to update the post
+  if (!user || (user.roleId !== "admin" && user.id !== req.params.userId)) {
+    return next(errorHandler(403, "You are not allowed to update this post"));
+  }
+
+  try {
+    // Call the model function to update the post
+    const updatedPost = await updatePostInDB(postId, {
+      title: req.body.title || "",
+      content: req.body.content || "",
+      category: req.body.category || "",
+      subtitle: req.body.subtitle || "",
+      coverImage: req.body.cover_image || null,
+    });
+
+    // Check if the post was updated successfully
+    if (!updatedPost) {
+      return next(errorHandler(404, "Post not found or update failed"));
+    }
+
+    res.status(200).json(updatedPost);
   } catch (error) {
     next(error);
   }

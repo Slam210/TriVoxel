@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { TextInput, Select, Alert } from "flowbite-react";
 import {
   getDownloadURL,
@@ -44,38 +44,54 @@ import "../css/ckeditor.css";
 interface UserState {
   user: {
     currentUser: {
+      id: string;
       roleid: string;
     };
   };
 }
 
-export default function CreatePost() {
+interface PostData {
+  id: Number;
+  title: string;
+  category: string;
+  content: string;
+  subtitle: string;
+  cover_image: string;
+}
+
+export default function UpdatePost() {
   const navigate = useNavigate();
-  const editorRef = useRef<HTMLDivElement | null>(null); // Create a ref for the editor container
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const { postId } = useParams<{ postId: string }>();
+
   const [editorInstance, setEditorInstance] = useState<any>(null); // State for the editor instance
 
   const [formData, setFormData] = useState<{
+    id: Number | null;
     title?: string;
     category?: string;
     content: string;
     subtitle?: string;
-    coverImage?: File | null; // File type for the uploaded image
+    coverImage?: File | null;
   }>({
+    id: null,
     title: "",
     category: "",
     content: "",
     subtitle: "",
     coverImage: null,
   });
-  const { currentUser } = useSelector((state: UserState) => state.user);
 
-  const [publishError, setPublishError] = useState<string | null>(null);
+  const { currentUser } = useSelector((state: UserState) => state.user);
+  const [publishError, setPublishError] = useState<string | null | undefined>(
+    null
+  );
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const file = e.target.files[0];
-      setFormData({ ...formData, coverImage: file });
+      setFormData((prev) => ({ ...prev, coverImage: file }));
       setImagePreview(URL.createObjectURL(file));
     }
   };
@@ -107,8 +123,6 @@ export default function CreatePost() {
     });
   };
 
-  const [contentUpdated, setContentUpdated] = useState(false); // State to track content update
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPublishError(null);
@@ -119,28 +133,14 @@ export default function CreatePost() {
       content: editorData,
     }));
 
-    setContentUpdated(true); // Indicate that we are updating content
+    if (!editorData || editorData === "<p><br></p>") {
+      setPublishError("Content cannot be empty.");
+      return;
+    }
+
+    await submitPost();
   };
 
-  useEffect(() => {
-    const contentIsEmpty =
-      !formData.content || formData.content === "<p><br></p>";
-
-    if (contentUpdated) {
-      // Check if we are in the process of submitting
-      if (contentIsEmpty) {
-        setPublishError("Content cannot be empty.");
-        setContentUpdated(false); // Reset for next submission
-        return;
-      }
-
-      // Continue with the rest of your submission logic here
-      submitPost(); // Define a function to handle the actual submission logic
-      setContentUpdated(false); // Reset for next submission
-    }
-  }, [formData.content]); // Listen to changes in formData.content
-
-  // Define your submitPost function for further logic
   const submitPost = async () => {
     const { coverImage, ...dataToSubmit } = formData;
 
@@ -152,13 +152,16 @@ export default function CreatePost() {
 
       const payload = { ...dataToSubmit, cover_image: coverImageUrl };
 
-      const res = await fetch("/api/post/create", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `/api/post/updatepost/${formData.id}/${currentUser.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) {
@@ -272,9 +275,40 @@ export default function CreatePost() {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const res = await fetch(`/api/post/getposts?postId=${postId}`);
+        const data: { posts: PostData[]; message?: string } = await res.json();
+
+        if (!res.ok) {
+          console.log(data.message);
+          setPublishError(data.message);
+          return;
+        }
+
+        setPublishError(null);
+        setFormData(data.posts[0]);
+        if (editorInstance) {
+          editorInstance.setData(data.posts[0].content); // Set editor content here
+        }
+        if (data.posts[0].cover_image) {
+          setImagePreview(data.posts[0].cover_image);
+        }
+      } catch (error) {
+        setPublishError("Error fetching post data");
+        console.error("Error fetching post:", error);
+      }
+    };
+
+    if (postId) {
+      fetchPost();
+    }
+  }, [postId, editorInstance]); // Include editorInstance as a dependency
+
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
-      <h1 className="text-center text-3xl my-7 font-semibold">Create a post</h1>
+      <h1 className="text-center text-3xl my-7 font-semibold">Update Post</h1>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         <div className="flex flex-col gap-4 sm:flex-row justify-between">
           <TextInput
@@ -284,14 +318,16 @@ export default function CreatePost() {
             id="title"
             className="flex-1 "
             onChange={(e) =>
-              setFormData({ ...formData, title: e.target.value })
+              setFormData((prev) => ({ ...prev, title: e.target.value }))
             }
+            value={formData.title}
           />
           <Select
             onChange={(e) =>
-              setFormData({ ...formData, category: e.target.value })
+              setFormData((prev) => ({ ...prev, category: e.target.value }))
             }
             required
+            value={formData.category}
           >
             <option value="">Select a category</option>
             {(currentUser.roleid === "admin" ||
@@ -318,16 +354,16 @@ export default function CreatePost() {
           id="subtitle"
           className="flex-1"
           onChange={(e) =>
-            setFormData({ ...formData, subtitle: e.target.value })
+            setFormData((prev) => ({ ...prev, subtitle: e.target.value }))
           }
           required
+          value={formData.subtitle}
         />
         <input
           type="file"
           accept="image/*"
           onChange={handleFileChange}
           className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-white dark:bg-black dark:text-gray-400 focus:outline-none dark:border-gray-600 placeholder-white dark:placeholder-black "
-          required
         />
 
         {imagePreview && (
@@ -346,7 +382,7 @@ export default function CreatePost() {
             className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg "
             type="submit"
           >
-            Publish
+            Update
           </button>
         </div>
 

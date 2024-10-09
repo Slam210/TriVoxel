@@ -12,6 +12,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import SignInSignUp from "./pages/SignInSignUpProcess/SignInSignUp";
 import CreatePost from "./pages/CreatePost";
 import RolePrivateRoute from "./components/RolePrivateRoute";
+import UpdatePost from "./pages/UpdatePost";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/tutorials" element={<Tutorials />} />
           <Route element={<RolePrivateRoute />}>
             <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/update-post/:postId" element={<UpdatePost />} />
           </Route>
         </Route>
       </Routes>

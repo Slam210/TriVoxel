@@ -13,6 +13,7 @@ import SignInSignUp from "./pages/SignInSignUpProcess/SignInSignUp";
 import CreatePost from "./pages/CreatePost";
 import RolePrivateRoute from "./components/RolePrivateRoute";
 import UpdatePost from "./pages/UpdatePost";
+import PostPage from "./pages/PostPage";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <Route element={<PrivateRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/post/:postSlug" element={<PostPage />} />
           <Route path="/resumes" element={<Resumes />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/tutorials" element={<Tutorials />} />

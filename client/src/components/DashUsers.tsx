@@ -2,7 +2,6 @@ import { Modal, Table, Button } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
-import { FaCheck, FaTimes } from "react-icons/fa";
 
 interface User {
   id: string;
@@ -37,7 +36,6 @@ export default function DashUsers() {
         const data = await res.json();
         if (res.ok) {
           setUsers(data.users);
-          console.log(data.users[0]);
           if (data.users.length < 9) {
             setShowMore(false);
           }
@@ -95,7 +93,7 @@ export default function DashUsers() {
               <Table.HeadCell>User image</Table.HeadCell>
               <Table.HeadCell>Username</Table.HeadCell>
               <Table.HeadCell>Email</Table.HeadCell>
-              <Table.HeadCell>Admin</Table.HeadCell>
+              <Table.HeadCell>Role</Table.HeadCell>
               <Table.HeadCell>Delete</Table.HeadCell>
             </Table.Head>
             {users.map((user) => (

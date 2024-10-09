@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import Signin from "./Signin";
 import Signup from "./Signup";
 import { CSSTransition, SwitchTransition } from "react-transition-group";
-import "./transitions.css";
+import "../../css/transitions.css";
 
 export default function SignInSignUp({
   isSignInBool = false,

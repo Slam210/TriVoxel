@@ -9,11 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^43.2.0",
+    "@ckeditor/ckeditor5-font": "^43.2.0",
+    "@ckeditor/ckeditor5-react": "^9.3.0",
+    "@ckeditor/ckeditor5-upload": "^43.2.0",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.7",
     "@types/react-transition-group": "^4.4.11",
     "@xeger/quill-image-actions": "^0.7.2",
     "@xeger/quill-image-formats": "^0.7.2",
+    "ckeditor5": "^43.2.0",
+    "ckeditor5-premium-features": "^43.2.0",
     "firebase": "^10.14.0",
     "flowbite-react": "^0.10.2",
     "quill-image-resize-module-react": "^3.0.0",

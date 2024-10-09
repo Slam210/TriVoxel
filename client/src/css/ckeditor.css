@@ -1,0 +1,198 @@
+:root {
+  /* Overrides the border radius and font size in the theme. */
+  --ck-border-radius: 4px;
+  --ck-font-size-base: 14px;
+
+  /* Common color variables */
+  --ck-custom-background: hsl(0, 0%, 0%); /* Dark background */
+  --ck-custom-foreground: hsl(0, 0%, 0%); /* Dark foreground */
+  --ck-custom-white: hsl(0, 0%, 100%); /* White color */
+
+  /* Light mode colors */
+  --ck-light-background: hsl(0, 0%, 100%); /* Light background */
+  --ck-light-text: hsl(0, 0%, 0%); /* Black text for light mode */
+  --ck-light-border: hsl(0, 0%, 0%); /* Border color in light mode */
+
+  /* Tooltip colors */
+  --ck-tooltip-background: var(
+    --ck-light-background
+  ); /* Light tooltip background */
+  --ck-tooltip-text: var(--ck-light-text); /* Dark text for light mode */
+
+  /* Button colors */
+  --ck-button-background: var(
+    --ck-light-background
+  ); /* Light button background */
+  --ck-button-text: var(--ck-light-text); /* Dark text for light buttons */
+  --ck-button-hover-background: hsl(270, 1%, 90%); /* Light hover background */
+
+  /* Dark mode colors */
+  --ck-dark-background: var(--ck-custom-background); /* Dark mode background */
+  --ck-dark-text: var(--ck-custom-white); /* White text for dark mode */
+  --ck-dark-border: hsl(0, 0%, 100%); /* Light border in dark mode */
+
+  /* Button colors for dark mode */
+  --ck-button-dark-background: var(
+    --ck-dark-background
+  ); /* Dark button background */
+  --ck-button-dark-text: var(--ck-dark-text); /* White text for dark buttons */
+  --ck-button-dark-hover-background: hsl(
+    270,
+    1%,
+    40%
+  ); /* Dark button hover background */
+}
+
+/* Light Mode Styles */
+.ck.ck-editor__main > .ck-editor__editable {
+  background-color: var(--ck-light-background); /* Light mode background */
+  color: var(--ck-light-text); /* Light mode text */
+}
+
+/* Dark Mode Styles */
+.dark .ck.ck-editor__main > .ck-editor__editable {
+  background-color: var(--ck-dark-background); /* Dark mode background */
+  color: var(--ck-dark-text); /* Dark mode text */
+}
+
+/* Tooltip Styles for Light Mode */
+.ck.ck-toolbar {
+  background-color: var(
+    --ck-tooltip-background
+  ); /* Light mode toolbar background */
+  color: var(--ck-tooltip-text); /* Light mode tooltip text */
+}
+
+/* Dark Mode Tooltip Styles */
+.dark .ck.ck-toolbar {
+  background-color: var(
+    --ck-dark-background
+  ); /* Dark mode tooltip background */
+  color: var(--ck-tooltip-text); /* Dark mode tooltip text */
+}
+
+/* Button Styles for Light Mode */
+.ck-button {
+  background-color: var(--ck-button-background); /* Light button background */
+  color: var(--ck-button-text); /* Light button text */
+}
+
+.ck-button:hover {
+  background-color: var(
+    --ck-button-hover-background
+  ); /* Light button hover background */
+}
+
+/* Dark Mode Button Styles */
+.dark .ck-button {
+  background-color: var(
+    --ck-button-dark-background
+  ); /* Dark button background */
+  color: var(--ck-button-dark-text); /* Dark button text */
+}
+
+.dark .ck-button:hover {
+  background-color: var(
+    --ck-button-dark-hover-background
+  ); /* Dark button hover background */
+}
+
+/* Toolbar Item Styles */
+.ck-toolbar .ck-button {
+  border: none; /* Remove border */
+  border-radius: var(--ck-border-radius); /* Apply border radius */
+  padding: 0.5em; /* Padding for toolbar buttons */
+}
+
+/* Light Mode Toolbar Item Styles */
+.ck-toolbar .ck-button {
+  background-color: var(--ck-button-background); /* Light button background */
+  color: var(--ck-button-text); /* Light button text */
+}
+
+.ck-toolbar .ck-button:hover {
+  background-color: var(
+    --ck-button-hover-background
+  ); /* Light button hover background */
+}
+
+/* Dark Mode Toolbar Item Styles */
+.dark .ck-toolbar .ck-button {
+  background-color: var(
+    --ck-button-dark-background
+  ); /* Dark button background */
+  color: var(--ck-button-dark-text); /* Dark button text */
+}
+
+.dark .ck-toolbar .ck-button:hover {
+  background-color: var(
+    --ck-button-dark-hover-background
+  ); /* Dark button hover background */
+}
+
+/* Dropdown Styles */
+.ck-dropdown-panel {
+  background-color: var(
+    --ck-light-background
+  ); /* Light mode dropdown background */
+  border: 1px solid var(--ck-light-border); /* Light mode dropdown border */
+}
+
+.dark .ck-dropdown-panel {
+  background-color: var(
+    --ck-dark-background
+  ); /* Dark mode dropdown background */
+  border: 1px solid var(--ck-dark-border); /* Dark mode dropdown border */
+}
+
+/* Dialog Styles */
+.ck-dialog {
+  background-color: var(
+    --ck-light-background
+  ); /* Light mode dialog background */
+}
+
+.dark .ck-dialog {
+  background-color: var(--ck-dark-background); /* Dark mode dialog background */
+}
+
+/* Input Styles */
+.ck-input {
+  background-color: var(
+    --ck-light-background
+  ); /* Light mode input background */
+  border: 1px solid var(--ck-light-border); /* Light mode input border */
+  color: var(--ck-light-text); /* Light mode input text */
+}
+
+.dark .ck-input {
+  background-color: var(--ck-dark-background); /* Dark mode input background */
+  border: 1px solid var(--ck-dark-border); /* Dark mode input border */
+  color: var(--ck-dark-text); /* Dark mode input text */
+}
+
+/* List Styles */
+.ck-list {
+  background-color: var(--ck-light-background); /* Light mode list background */
+}
+
+.dark .ck-list {
+  background-color: var(--ck-dark-background); /* Dark mode list background */
+}
+
+/* Panel Styles */
+.ck-panel {
+  background-color: var(
+    --ck-light-background
+  ); /* Light mode panel background */
+}
+
+.dark .ck-panel {
+  background-color: var(--ck-dark-background); /* Dark mode panel background */
+}
+
+/* Other styles can follow the same pattern for light and dark modes */
+
+.dark .ck-content pre {
+  color: white;
+}

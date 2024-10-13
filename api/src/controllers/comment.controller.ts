@@ -11,6 +11,7 @@ import {
   findCommentById,
   updateCommentLikes,
   updateCommentContent,
+  deleteCommentById,
 } from "../models/comment.model.js";
 
 // Simulate __dirname
@@ -131,6 +132,39 @@ export const editComment = async (
     );
 
     res.status(200).json(updatedComment);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Delete a comment
+export const deleteComment = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const commentId = req.params.commentId;
+    const userId = req.user.id;
+
+    // Find the comment by ID
+    const comment = await findCommentById(commentId);
+
+    if (!comment) {
+      return next(errorHandler(404, "Comment not found"));
+    }
+
+    // Check if the user is the owner of the comment or an admin
+    if (comment.user_id !== userId && req.user.roleId !== "admin") {
+      return next(
+        errorHandler(403, "You are not allowed to delete this comment")
+      );
+    }
+
+    // Delete the comment
+    await deleteCommentById(commentId);
+
+    res.status(200).json("Comment has been deleted");
   } catch (error) {
     next(error);
   }

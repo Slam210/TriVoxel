@@ -125,3 +125,14 @@ export const updateCommentContent = async (
     throw new Error("Failed to update comment");
   }
 };
+
+// Delete a comment by ID
+export const deleteCommentById = async (commentId: string) => {
+  try {
+    const query = `DELETE FROM comments WHERE id = $1`;
+    await pool.query(query, [commentId]);
+  } catch (error) {
+    console.error("Error deleting comment:", error);
+    throw new Error("Failed to delete comment");
+  }
+};

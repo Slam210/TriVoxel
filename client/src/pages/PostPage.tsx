@@ -2,6 +2,7 @@ import { Button, Spinner } from "flowbite-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
+import CommentSection from "../components/CommentSection";
 
 // Define Post interface
 interface Post {
@@ -70,10 +71,10 @@ export default function PostPage() {
 
   return (
     <main className="p-3 flex flex-col max-w-6xl mx-auto min-h-screen">
-      <h1 className="text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl">
+      <h1 className="text-3xl mt-10 p-3 mb-0 pb-0 text-center font-serif max-w-2xl mx-auto lg:text-4xl">
         {post?.title}
       </h1>
-      <h6 className="text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl">
+      <h6 className="text-3xl mt-2 p-3 text-center font-serif max-w-lg mx-auto lg:text-4xl">
         {post?.title}
       </h6>
       <Link to={`/${post?.category}`} className="self-center mt-5">
@@ -104,6 +105,7 @@ export default function PostPage() {
         className="p-3 max-w-2xl mx-auto w-full post-content"
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       ></div>
+      <CommentSection postId={post?.id} />
     </main>
   );
 }

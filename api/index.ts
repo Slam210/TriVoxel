@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import userRoutes from "./src/routes/user.route.js";
 import authRoutes from "./src/routes/auth.route.js";
 import postRoutes from "./src/routes/post.route.js";
+import commentRoutes from "./src/routes/comment.route.js";
 import cookieParser from "cookie-parser";
 
 // Simulate __dirname
@@ -62,6 +63,7 @@ interface CustomError extends Error {
 app.use("/api/user", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/post", postRoutes);
+app.use("/api/comment", commentRoutes);
 
 app.use((err: CustomError, req: Request, res: Response, next: NextFunction) => {
   const statusCode = err.statusCode || 500;

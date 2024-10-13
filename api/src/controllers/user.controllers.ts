@@ -7,6 +7,7 @@ import {
   getUsersFromDatabase,
   getUsersCount,
   getLastMonthUsersCount,
+  getUserfromDatabase,
 } from "../models/user.model.js";
 
 export const test = (req: any, res: any) => {
@@ -112,6 +113,19 @@ export const getUsers = async (req: any, res: any, next: NextFunction) => {
       totalUsers,
       lastMonthUsers,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUser = async (req: any, res: any, next: NextFunction) => {
+  try {
+    const user = await getUserfromDatabase(req.params.userId);
+    if (!user) {
+      return next(errorHandler(404, "User not found"));
+    }
+    const { password, ...rest } = user;
+    res.status(200).json(rest);
   } catch (error) {
     next(error);
   }

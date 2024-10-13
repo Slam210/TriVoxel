@@ -222,3 +222,14 @@ export const getLastMonthUsersCount = async (): Promise<number> => {
   const result = await pool.query(query, [oneMonthAgo]);
   return parseInt(result.rows[0].count, 10);
 };
+
+// Fetch user
+export const getUserfromDatabase = async (userId: number): Promise<User> => {
+  const query = `
+    SELECT * FROM users WHERE id = $1;
+  `;
+
+  const result = await pool.query(query, [userId]);
+  console.log(result.rows[0]);
+  return result.rows[0];
+};

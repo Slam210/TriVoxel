@@ -105,3 +105,23 @@ export const updateCommentLikes = async (
     throw new Error("Failed to update comment likes");
   }
 };
+
+// Update comment content in the database
+export const updateCommentContent = async (
+  commentId: string,
+  content: string
+) => {
+  try {
+    const query = `
+      UPDATE comments
+      SET content = $1, updated_at = NOW()
+      WHERE id = $2
+      RETURNING *;
+    `;
+    const result = await pool.query(query, [content, commentId]);
+    return result.rows[0]; // Return the updated comment
+  } catch (error) {
+    console.error("Error updating comment content:", error);
+    throw new Error("Failed to update comment");
+  }
+};

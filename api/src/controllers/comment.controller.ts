@@ -10,6 +10,7 @@ import {
   findPostComments,
   findCommentById,
   updateCommentLikes,
+  updateCommentContent,
 } from "../models/comment.model.js";
 
 // Simulate __dirname
@@ -91,6 +92,42 @@ export const likeComment = async (
       commentId,
       comment.likes,
       comment.number_of_likes
+    );
+
+    res.status(200).json(updatedComment);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Edit a comment
+export const editComment = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const commentId = req.params.commentId;
+    const userId = req.user.id;
+
+    // Find the comment by ID
+    const comment = await findCommentById(commentId);
+
+    if (!comment) {
+      return next(errorHandler(404, "Comment not found"));
+    }
+
+    // Check if the user is the owner of the comment or an admin
+    if (comment.user_id !== userId && req.user.roleId !== "admin") {
+      return next(
+        errorHandler(403, "You are not allowed to edit this comment")
+      );
+    }
+
+    // Update the comment content
+    const updatedComment = await updateCommentContent(
+      commentId,
+      req.body.content
     );
 
     res.status(200).json(updatedComment);

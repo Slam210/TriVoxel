@@ -87,8 +87,12 @@ export default function CommentSection({ postId }: { postId: string }) {
     }
   };
 
-  const handleEdit = (comment: CommentType, editedContent: string) => {
-    console.log(comment, editedContent);
+  const handleEdit = async (comment: CommentType, editedContent: string) => {
+    setComments(
+      comments.map((c) =>
+        c.id === comment.id ? { ...c, content: editedContent } : c
+      )
+    );
   };
 
   useEffect(() => {

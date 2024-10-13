@@ -109,8 +109,9 @@ export const getPosts = async (
       queryParams.push(req.query.slug);
     }
 
+    // Check if a postId is provided in the query and exclude it
     if (req.query.postId) {
-      filters.push(`id = $${filters.length + 1}`);
+      filters.push(`id != $${filters.length + 1}`); // Use != to exclude the post
       queryParams.push(req.query.postId);
     }
 
@@ -160,7 +161,6 @@ export const getPosts = async (
     next(error);
   }
 };
-
 export const getUserPosts = async (
   req: any,
   res: Response,

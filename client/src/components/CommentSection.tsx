@@ -9,7 +9,7 @@ interface UserState {
   user: {
     currentUser: {
       id: number;
-      profile_image: string;
+      profile_picture: string;
       roleid: string;
       username: string;
     };
@@ -139,7 +139,7 @@ export default function CommentSection({ postId }: { postId: string }) {
           <p>Signed in as:</p>
           <img
             className="h-5 w-5 object-cover rounded-full"
-            src={currentUser.profile_image}
+            src={currentUser.profile_picture}
             alt=""
           />
           <Link

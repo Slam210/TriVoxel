@@ -3,16 +3,18 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import CommentSection from "../components/CommentSection";
+import PostCard from "../components/PostCard";
 
 // Define Post interface
 interface Post {
-  id: number;
+  id: any;
   title: string;
   category: string;
   content: string;
   subtitle: string;
   cover_image: string;
-  created_at: string; // Added missing 'created_at' property
+  created_at: string;
+  slug: string;
 }
 
 export default function PostPage() {
@@ -21,6 +23,7 @@ export default function PostPage() {
   const [error, setError] = useState<boolean>(false);
   const [post, setPost] = useState<Post | null>(null);
   const [sanitizedContent, setSanitizedContent] = useState<string>("");
+  const [recentPosts, setRecentPosts] = useState<Post[] | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -53,6 +56,26 @@ export default function PostPage() {
     fetchPost();
   }, [postSlug]);
 
+  useEffect(() => {
+    const fetchRecentPosts = async () => {
+      if (post) {
+        // Ensure post is available before fetching recent posts
+        try {
+          const res = await fetch(
+            `/api/post/getposts?limit=3&postId=${post.id}`
+          );
+          const data = await res.json();
+          if (res.ok) {
+            setRecentPosts(data.posts);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    };
+    fetchRecentPosts();
+  }, [post]); // Dependency on post to refetch when post changes
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -75,7 +98,7 @@ export default function PostPage() {
         {post?.title}
       </h1>
       <h6 className="text-3xl mt-2 p-3 text-center font-serif max-w-lg mx-auto lg:text-4xl">
-        {post?.title}
+        {post?.subtitle}
       </h6>
       <Link to={`/${post?.category}`} className="self-center mt-5">
         <Button color="gray" pill size="xs">
@@ -94,11 +117,9 @@ export default function PostPage() {
       <div className="flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs">
         <span>{post && new Date(post.created_at).toLocaleDateString()}</span>
         <span className="italic">
-          {post &&
-            ((post.content.length / 250).toFixed(0) === "0"
-              ? ">1"
-              : (post.content.length / 250).toFixed(0))}{" "}
-          mins read
+          {post && Math.ceil(post.content.length / 250) > 1
+            ? `${Math.ceil(post.content.length / 250)} mins read`
+            : ">1 min read"}
         </span>
       </div>
       <div
@@ -106,6 +127,15 @@ export default function PostPage() {
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       ></div>
       <CommentSection postId={post?.id} />
+      <div className="flex flex-col justify-center items-center mb-5">
+        <h1 className="text-xl mt-5">Recent articles</h1>
+        <div className="flex flex-wrap gap-5 mt-5 justify-center">
+          {recentPosts &&
+            recentPosts.map((recentPost) => (
+              <PostCard key={recentPost.id} post={recentPost} />
+            ))}
+        </div>
+      </div>
     </main>
   );
 }

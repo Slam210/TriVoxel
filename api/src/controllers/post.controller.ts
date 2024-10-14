@@ -161,6 +161,7 @@ export const getPosts = async (
     next(error);
   }
 };
+
 export const getUserPosts = async (
   req: any,
   res: Response,

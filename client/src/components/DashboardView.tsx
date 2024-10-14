@@ -128,7 +128,7 @@ export default function DashboardView() {
 
   return (
     <div className="p-6 md:mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-10 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
         {/* Column 1: Users */}
         <div className="flex flex-col col-span-3">
           {/* Total Users Card */}

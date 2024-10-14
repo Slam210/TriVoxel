@@ -15,10 +15,11 @@ interface Post {
   slug: string;
 }
 
-const Blogs: React.FC = () => {
+const Search: React.FC = () => {
   const [sidebarData, setSidebarData] = useState({
     searchTerm: "",
     sort: "desc",
+    category: "uncategorized",
   });
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -32,17 +33,19 @@ const Blogs: React.FC = () => {
     const urlParams = new URLSearchParams(location.search);
     const searchTermFromUrl = urlParams.get("searchTerm");
     const sortFromUrl = urlParams.get("sort");
-
-    setSidebarData({
-      ...sidebarData,
-      searchTerm: searchTermFromUrl || "",
-      sort: sortFromUrl || "desc",
-    });
+    const categoryFromUrl = urlParams.get("category");
+    if (searchTermFromUrl || sortFromUrl || categoryFromUrl) {
+      setSidebarData({
+        ...sidebarData,
+        searchTerm: searchTermFromUrl || "",
+        sort: sortFromUrl || "desc",
+        category: categoryFromUrl || "uncategorized",
+      });
+    }
 
     const fetchPosts = async () => {
       setLoading(true);
-      // Add the default category "blogs" to the query
-      const searchQuery = urlParams.toString() + "&category=blogs";
+      const searchQuery = urlParams.toString();
       const res = await fetch(`/api/post/getposts?${searchQuery}`);
       if (!res.ok) {
         setLoading(false);
@@ -73,16 +76,16 @@ const Blogs: React.FC = () => {
     const urlParams = new URLSearchParams(location.search);
     urlParams.set("searchTerm", sidebarData.searchTerm);
     urlParams.set("sort", sidebarData.sort);
+    urlParams.set("category", sidebarData.category);
     const searchQuery = urlParams.toString();
-    navigate(`/blogs?${searchQuery}`);
+    navigate(`/search?${searchQuery}`);
   };
 
   const handleShowMore = async () => {
     const startIndex = posts.length;
     const urlParams = new URLSearchParams(location.search);
     urlParams.set("startIndex", startIndex.toString());
-    // Add the default category "blogs" to the query
-    const searchQuery = urlParams.toString() + "&category=blogs";
+    const searchQuery = urlParams.toString();
     const res = await fetch(`/api/post/getposts?${searchQuery}`);
     if (!res.ok) {
       return;
@@ -123,6 +126,19 @@ const Blogs: React.FC = () => {
               <option value="asc">Oldest</option>
             </Select>
           </div>
+          <div className="flex items-center gap-2">
+            <label className="font-semibold">Category:</label>
+            <Select
+              onChange={handleChange}
+              value={sidebarData.category}
+              id="category"
+            >
+              <option value="">Select a category</option>
+              <option value="tutorials">Tutorials</option>
+              <option value="blogs">Blogs</option>
+              <option value="resume">Resumes</option>
+            </Select>
+          </div>
           <Button
             type="submit"
             outline
@@ -134,7 +150,7 @@ const Blogs: React.FC = () => {
       </div>
       <div className="w-full">
         <h1 className="text-3xl font-semibold sm:border-b border-gray-500 p-3 mt-5 ">
-          Blogs results:
+          Posts results:
         </h1>
         <div className="p-7 flex flex-wrap gap-4">
           {!loading && sortedPosts.length === 0 && (
@@ -157,4 +173,4 @@ const Blogs: React.FC = () => {
   );
 };
 
-export default Blogs;
+export default Search;

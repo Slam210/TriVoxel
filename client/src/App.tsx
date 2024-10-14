@@ -15,6 +15,7 @@ import RolePrivateRoute from "./components/RolePrivateRoute";
 import UpdatePost from "./pages/UpdatePost";
 import PostPage from "./pages/PostPage";
 import ScrollToTop from "./components/ScrollToTop";
+import Search from "./pages/Search";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/post/:postSlug" element={<PostPage />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/resumes" element={<Resumes />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/tutorials" element={<Tutorials />} />

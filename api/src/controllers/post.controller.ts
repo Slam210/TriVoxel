@@ -100,8 +100,10 @@ export const getPosts = async (
     }
 
     if (req.query.category) {
-      filters.push(`category = $${filters.length + 1}`);
-      queryParams.push(req.query.category);
+      if (req.query.category !== "uncategorized") {
+        filters.push(`category = $${filters.length + 1}`);
+        queryParams.push(req.query.category);
+      }
     }
 
     if (req.query.slug) {
@@ -117,7 +119,7 @@ export const getPosts = async (
 
     if (req.query.searchTerm) {
       filters.push(
-        `(title ILIKE $${filters.length + 1} OR content ILIKE $${
+        `(title LIKE $${filters.length + 1} OR content LIKE $${
           filters.length + 2
         })`
       );

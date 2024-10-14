@@ -9,7 +9,6 @@ interface User {
   email: string;
   roleid: string;
   profile_picture: string;
-  isAdmin: boolean;
   created_at: string;
 }
 

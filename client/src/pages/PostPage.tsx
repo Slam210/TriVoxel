@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import DOMPurify from "dompurify";
 import CommentSection from "../components/CommentSection";
 import PostCard from "../components/PostCard";
+import "../css/post.css";
 
 // Define Post interface
 interface Post {

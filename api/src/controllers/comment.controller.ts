@@ -12,6 +12,7 @@ import {
   updateCommentLikes,
   updateCommentContent,
   deleteCommentById,
+  getCommentsByRole,
 } from "../models/comment.model.js";
 
 // Simulate __dirname
@@ -165,6 +166,44 @@ export const deleteComment = async (
     await deleteCommentById(commentId);
 
     res.status(200).json("Comment has been deleted");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getcomments = async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  // Check if the user has the appropriate role
+  const allowedRoles = ["admin", "contributor", "verifieduser", "user"];
+
+  if (!allowedRoles.includes(req.user.roleId)) {
+    return next(errorHandler(403, "You are not allowed to get all comments"));
+  }
+
+  try {
+    // Determine if the user is an admin
+    const userId = req.user.id; // Assuming user ID is available in req.user
+    const roleid = req.user.roleId;
+
+    // Fetch comments based on role
+    const comments = await getCommentsByRole(userId, roleid);
+
+    // Additional statistics if needed
+    const totalComments = comments.length;
+    const now = new Date();
+    const oneMonthAgo = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      now.getDate()
+    );
+    const lastMonthComments = comments.filter(
+      (comment) => new Date(comment.created_at) >= oneMonthAgo
+    ).length;
+
+    res.status(200).json({ comments, totalComments, lastMonthComments });
   } catch (error) {
     next(error);
   }

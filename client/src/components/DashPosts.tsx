@@ -103,7 +103,7 @@ export default function DashPosts() {
         currentUser.roleid === "user") &&
       userPosts.length > 0 ? (
         <>
-          <Table hoverable className="shadow-md">
+          <Table hoverable className="shadow-md text-center">
             <Table.Head>
               <Table.HeadCell>Date updated</Table.HeadCell>
               <Table.HeadCell>Post cover_image</Table.HeadCell>

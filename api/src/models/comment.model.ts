@@ -136,3 +136,26 @@ export const deleteCommentById = async (commentId: string) => {
     throw new Error("Failed to delete comment");
   }
 };
+
+// Get all comments based on user role
+export const getCommentsByRole = async (userId: number, roleid: string) => {
+  try {
+    let query: string;
+    let params: any[] = [];
+
+    // If user is admin, fetch all comments, otherwise fetch comments by user ID
+    if (roleid === "admin") {
+      query = "SELECT * FROM comments ORDER BY created_at DESC;";
+    } else {
+      query =
+        "SELECT * FROM comments WHERE user_id = $1 ORDER BY created_at DESC;";
+      params.push(String(userId));
+    }
+
+    const result = await pool.query(query, params);
+    return result.rows; // Return the comments found
+  } catch (error) {
+    console.error("Error getting comments:", error);
+    throw new Error("Failed to get comments");
+  }
+};

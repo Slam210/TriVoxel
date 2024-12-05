@@ -73,8 +73,4 @@ export const theme = {
     },
   },
 };
-export const plugins = [
-  plugin(),
-  require("tailwind-scrollbar"),
-  require("@tailwindcss/line-clamp"),
-];
+export const plugins = [plugin(), require("tailwind-scrollbar")];

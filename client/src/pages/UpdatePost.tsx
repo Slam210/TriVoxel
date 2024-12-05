@@ -64,7 +64,7 @@ export default function UpdatePost() {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const { postId } = useParams<{ postId: string }>();
 
-  const [editorInstance, setEditorInstance] = useState<any>(null); // State for the editor instance
+  const [editorInstance, setEditorInstance] = useState<any>(null);
 
   const [formData, setFormData] = useState<{
     id: Number | null;

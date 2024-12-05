@@ -16,6 +16,7 @@ import UpdatePost from "./pages/UpdatePost";
 import PostPage from "./pages/PostPage";
 import ScrollToTop from "./components/ScrollToTop";
 import Search from "./pages/Search";
+import CreateResume from "./pages/CreateResume";
 
 export default function App() {
   return (
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/tutorials" element={<Tutorials />} />
           <Route element={<RolePrivateRoute />}>
             <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/create-resume" element={<CreateResume />} />
             <Route path="/update-post/:postId" element={<UpdatePost />} />
           </Route>
         </Route>

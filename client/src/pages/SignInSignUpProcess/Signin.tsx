@@ -79,7 +79,7 @@ export default function Signin({ onSwitch }: { onSwitch: () => void }) {
       0.1,
       1000
     );
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(400, 400);
     if (mountRef.current) {
       mountRef.current.appendChild(renderer.domElement);

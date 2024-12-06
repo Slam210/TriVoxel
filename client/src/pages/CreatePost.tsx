@@ -51,15 +51,15 @@ interface UserState {
 
 export default function CreatePost() {
   const navigate = useNavigate();
-  const editorRef = useRef<HTMLDivElement | null>(null); // Create a ref for the editor container
-  const [editorInstance, setEditorInstance] = useState<any>(null); // State for the editor instance
+  const editorRef = useRef<HTMLDivElement | null>(null); // Ref for the editor container
+  const [editorInstance, setEditorInstance] = useState<any>(null); // Editor instance
 
   const [formData, setFormData] = useState<{
     title?: string;
     category?: string;
     content: string;
     subtitle?: string;
-    coverImage?: File | null; // File type for the uploaded image
+    coverImage?: File | null;
   }>({
     title: "",
     category: "",
@@ -107,19 +107,23 @@ export default function CreatePost() {
     });
   };
 
-  const [contentUpdated, setContentUpdated] = useState(false); // State to track content update
+  const [contentUpdated, setContentUpdated] = useState(false); // Track content update
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPublishError(null);
 
-    const editorData = editorInstance.getData();
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      content: editorData,
-    }));
+    if (editorInstance) {
+      const editorData = editorInstance.getData(); // Ensure the editor instance is available
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        content: editorData,
+      }));
+    } else {
+      setPublishError("Editor is not initialized properly.");
+    }
 
-    setContentUpdated(true); // Indicate that we are updating content
+    setContentUpdated(true); // Indicate content is being updated
   };
 
   useEffect(() => {
@@ -127,20 +131,18 @@ export default function CreatePost() {
       !formData.content || formData.content === "<p><br></p>";
 
     if (contentUpdated) {
-      // Check if we are in the process of submitting
+      // Check if content is empty during submission
       if (contentIsEmpty) {
         setPublishError("Content cannot be empty.");
-        setContentUpdated(false); // Reset for next submission
+        setContentUpdated(false);
         return;
       }
 
-      // Continue with the rest of your submission logic here
-      submitPost(); // Define a function to handle the actual submission logic
+      submitPost(); // Proceed with submission logic
       setContentUpdated(false); // Reset for next submission
     }
-  }, [formData.content]); // Listen to changes in formData.content
+  }, [formData.content]);
 
-  // Define your submitPost function for further logic
   const submitPost = async () => {
     const { coverImage, ...dataToSubmit } = formData;
 
@@ -176,68 +178,138 @@ export default function CreatePost() {
   };
 
   useEffect(() => {
-    if (editorRef.current) {
+    // Destroy the current editor instance if it exists
+    if (editorInstance) {
+      editorInstance.destroy().catch((error: any) => {
+        console.error("Error during editor destruction", error);
+      });
+    }
+
+    // Initialize the new editor based on the category
+    if (formData.category && editorRef.current) {
+      const isTutorial = formData.category === "tutorials";
+
+      const plugins = isTutorial
+        ? [
+            Essentials,
+            Bold,
+            Italic,
+            Font,
+            Paragraph,
+            Heading,
+            Strikethrough,
+            Code,
+            Indent,
+            BlockQuote,
+            Link,
+            AutoImage,
+          ]
+        : [
+            Essentials,
+            Bold,
+            Italic,
+            Font,
+            Paragraph,
+            Heading,
+            Strikethrough,
+            Code,
+            Indent,
+            BlockQuote,
+            Link,
+            AutoImage,
+            CodeBlock,
+            ImageUpload,
+            Base64UploadAdapter,
+          ];
+
+      const toolbarItems = [
+        "undo",
+        "redo",
+        "|",
+        "heading",
+        "|",
+        "bold",
+        "italic",
+        "strikethrough",
+        "link",
+      ];
+
+      if (isTutorial) {
+        toolbarItems.push(
+          "insertImage",
+          "codeBlock",
+          "|",
+          "bulletedList",
+          "numberedList"
+        );
+      }
+
+      // Create the new editor based on category
       ClassicEditor.create(editorRef.current, {
-        plugins: [
-          Essentials,
-          Bold,
-          Italic,
-          Font,
-          Paragraph,
-          Heading,
-          Strikethrough,
-          Subscript,
-          Superscript,
-          Code,
-          Indent,
-          CodeBlock,
-          BlockQuote,
-          Link,
-          AutoImage,
-          AutoLink,
-          Image,
-          ImageToolbar,
-          ImageCaption,
-          ImageStyle,
-          ImageResize,
-          ImageUpload,
-          LinkImage,
-          List,
-          TodoList,
-          Base64UploadAdapter,
-        ],
+        plugins: isTutorial
+          ? [
+              Essentials,
+              Bold,
+              Italic,
+              Font,
+              Paragraph,
+              Heading,
+              Strikethrough,
+              Subscript,
+              Superscript,
+              Code,
+              Indent,
+              CodeBlock,
+              BlockQuote,
+              Link,
+              AutoImage,
+              AutoLink,
+              Image,
+              ImageToolbar,
+              ImageCaption,
+              ImageStyle,
+              ImageResize,
+              ImageUpload,
+              LinkImage,
+              List,
+              TodoList,
+              Base64UploadAdapter,
+            ]
+          : plugins,
         toolbar: {
-          items: [
-            "undo",
-            "redo",
-            "|",
-            "heading",
-            "|",
-            "fontfamily",
-            "fontsize",
-            "fontColor",
-            "fontBackgroundColor",
-            "|",
-            "bold",
-            "italic",
-            "strikethrough",
-            "subscript",
-            "superscript",
-            "code",
-            "|",
-            "link",
-            "insertImage",
-            "blockQuote",
-            "codeBlock",
-            "|",
-            "bulletedList",
-            "numberedList",
-            "todoList",
-            "outdent",
-            "indent",
-            "|",
-            "linkImage",
-          ],
+          items: isTutorial
+            ? [
+                "undo",
+                "redo",
+                "|",
+                "heading",
+                "|",
+                "fontfamily",
+                "fontsize",
+                "fontColor",
+                "fontBackgroundColor",
+                "|",
+                "bold",
+                "italic",
+                "strikethrough",
+                "subscript",
+                "superscript",
+                "code",
+                "|",
+                "link",
+                "insertImage",
+                "blockQuote",
+                "codeBlock",
+                "|",
+                "bulletedList",
+                "numberedList",
+                "todoList",
+                "outdent",
+                "indent",
+                "|",
+                "linkImage",
+              ]
+            : toolbarItems,
           shouldNotGroupWhenFull: true,
         },
         image: {
@@ -256,13 +328,14 @@ export default function CreatePost() {
         },
       })
         .then((editor) => {
-          setEditorInstance(editor); // Store the editor instance in state
+          setEditorInstance(editor); // Update the state with the new editor instance
         })
         .catch((error) => {
           console.error("There was a problem initializing the editor", error);
         });
     }
 
+    // Cleanup function: Destroy the editor instance when the component unmounts or category changes
     return () => {
       if (editorInstance) {
         editorInstance.destroy().catch((error: any) => {
@@ -270,7 +343,7 @@ export default function CreatePost() {
         });
       }
     };
-  }, []);
+  }, [formData.category]);
 
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
@@ -282,7 +355,7 @@ export default function CreatePost() {
             placeholder="Title"
             required
             id="title"
-            className="flex-1 "
+            className="flex-1"
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
             }
@@ -312,16 +385,18 @@ export default function CreatePost() {
           </Select>
         </div>
 
-        <TextInput
-          type="text"
-          placeholder="Subtitle"
-          id="subtitle"
-          className="flex-1"
-          onChange={(e) =>
-            setFormData({ ...formData, subtitle: e.target.value })
-          }
-          required
-        />
+        {formData.category === "tutorials" && (
+          <TextInput
+            type="text"
+            placeholder="Subtitle"
+            id="subtitle"
+            className="flex-1"
+            onChange={(e) =>
+              setFormData({ ...formData, subtitle: e.target.value })
+            }
+            required
+          />
+        )}
         <input
           type="file"
           accept="image/*"
@@ -331,30 +406,31 @@ export default function CreatePost() {
         />
 
         {imagePreview && (
-          <img
-            src={imagePreview}
-            alt="Cover Preview"
-            className="mt-4 border dark:border-[#4b5563] rounded max-w-full h-auto p-4"
-          />
+          <div className="w-64 mx-auto">
+            <img src={imagePreview} alt="Preview" className="rounded-lg mt-3" />
+          </div>
         )}
 
-        {/* CKEditor 5 */}
-        <div ref={editorRef} id="editor" className="editor-container"></div>
-
-        <div className="bg-gradient-to-tr from-red-400 via-blue-400 to-green-400 bg-transparent p-0.5 rounded-lg">
+        {(formData.category === "tutorials" ||
+          formData.category === "blogs") && (
+          <div ref={editorRef} className="mt-4"></div>
+        )}
+        {publishError && <Alert>{publishError}</Alert>}
+        <div className="flex gap-2 justify-center mt-4">
           <button
-            className="w-full bg-white dark:bg-black hover:bg-gradient-to-tr hover:from-red-400 hover:via-blue-400 hover:to-green-400 px-4 py-2 rounded-lg "
             type="submit"
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg"
           >
             Publish
           </button>
+          <button
+            type="reset"
+            className="bg-gray-300 text-black py-2 px-4 rounded-lg"
+            onClick={() => setFormData({ ...formData, content: "" })}
+          >
+            Reset
+          </button>
         </div>
-
-        {publishError && (
-          <Alert className="mt-5" color="failure">
-            {publishError}
-          </Alert>
-        )}
       </form>
     </div>
   );

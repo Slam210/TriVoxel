@@ -1,7 +1,8 @@
 import { Alert, Spinner } from "flowbite-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import OAuth from "../../components/OAuth";
+import * as THREE from "three";
 
 // Define an interface for form data
 interface FormData {
@@ -64,6 +65,115 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
     }
     return;
   };
+
+  const mountRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(400, 400);
+    if (mountRef.current) {
+      mountRef.current.appendChild(renderer.domElement);
+    }
+
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+
+    const light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(10, 10, 10);
+    camera.position.z = 2;
+
+    scene.add(light);
+    scene.add(cube);
+
+    // Initialize colors for smooth transition
+    const startColor = new THREE.Color(0x0000ff); // Blue
+    const endColor = new THREE.Color(0x00ff00); // Green
+    let lerpFactor = 0;
+    let colorDirection = 1; // 1 means transitioning towards endColor, -1 means transitioning towards startColor
+
+    // Track mouse drag state
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+
+    // Handle mouse events for rotation
+    const onMouseDown = (event: { clientX: any; clientY: any }) => {
+      isDragging = true;
+      previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+    };
+
+    const onMouseMove = (event: { clientX: number; clientY: number }) => {
+      if (!isDragging) return;
+
+      const deltaX = event.clientX - previousMousePosition.x;
+      const deltaY = event.clientY - previousMousePosition.y;
+
+      cube.rotation.x += deltaY * 0.01; // Adjust rotation sensitivity
+      cube.rotation.y += deltaX * 0.01;
+
+      previousMousePosition = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+    };
+
+    const onMouseUp = () => {
+      isDragging = false;
+    };
+
+    // Add event listeners for mouse drag
+    window.addEventListener("mousedown", onMouseDown);
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    // Function to update cube's color gradually
+    const updateColor = () => {
+      // Gradually interpolate color between start and end
+      lerpFactor += 0.005 * colorDirection; // Increase or decrease the speed of color transition
+      if (lerpFactor > 1) {
+        lerpFactor = 1;
+        colorDirection = -1; // Reverse direction towards startColor
+      } else if (lerpFactor < 0) {
+        lerpFactor = 0;
+        colorDirection = 1; // Reverse direction towards endColor
+      }
+
+      // Lerp between two colors
+      material.color.lerpColors(startColor, endColor, lerpFactor);
+    };
+
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+
+      // Update the cube's color gradually
+      updateColor();
+
+      // Rotate cube
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+
+      renderer.render(scene, camera);
+    };
+    animate(); // Start the animation loop
+
+    // Cleanup event listeners when the component is unmounted
+    return () => {
+      window.removeEventListener("mousedown", onMouseDown);
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
 
   return (
     <div className="md:mt-20 min-h-screen">
@@ -151,6 +261,7 @@ export default function Signup({ onSwitch }: { onSwitch: () => void }) {
           <p className="text-sm mt-5">
             Sign up with email and password or with google.
           </p>
+          <div className="max-h-48" ref={mountRef}></div>
         </div>
       </div>
     </div>

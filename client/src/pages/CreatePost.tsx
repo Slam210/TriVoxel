@@ -44,9 +44,29 @@ import "../css/ckeditor.css";
 interface UserState {
   user: {
     currentUser: {
+      id: string;
       roleid: string;
     };
   };
+}
+
+interface Resume {
+  id: number; // Unique identifier for the resume
+  user_id: string; // UUID of the user who owns the resume
+  layers: Array<{
+    id: number; // Unique identifier for the layer
+    parts: Array<{
+      text: string; // The content of the layer part
+      editable: boolean; // Whether the part is editable
+    }>;
+  }>;
+  colors: {
+    backgroundColor: string; // Hex code for the background color
+    headingTextColor: string; // Hex code for the heading text color
+    headingSubtextColor: string; // Hex code for the heading subtext color
+  };
+  created_at: string; // ISO string for creation timestamp
+  updated_at: string; // ISO string for last updated timestamp
 }
 
 export default function CreatePost() {
@@ -71,6 +91,8 @@ export default function CreatePost() {
 
   const [publishError, setPublishError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -345,6 +367,47 @@ export default function CreatePost() {
     };
   }, [formData.category]);
 
+  useEffect(() => {
+    const getResumes = async () => {
+      if (!currentUser?.id) {
+        console.warn("User ID is not available");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `/api/resume/resumes/user/${currentUser.id}`,
+          {
+            method: "GET", // Use GET for fetching data
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to get resumes: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        console.log("Fetched resumes:", result);
+        setResumes(result); // Update state with fetched resumes
+      } catch (error) {
+        console.error("Error fetching resumes:", error);
+      }
+    };
+
+    getResumes();
+  }, [currentUser?.id]);
+
+  const handleResumeSelect = (resume: Resume) => {
+    setSelectedResume(resume);
+    setFormData({
+      ...formData,
+      content: JSON.stringify(resume), // Store the whole resume object as a string
+    });
+  };
+
   return (
     <div className="p-3 max-w-3xl mx-auto min-h-screen">
       <h1 className="text-center text-3xl my-7 font-semibold">Create a post</h1>
@@ -397,6 +460,7 @@ export default function CreatePost() {
             required
           />
         )}
+
         <input
           type="file"
           accept="image/*"
@@ -415,7 +479,32 @@ export default function CreatePost() {
           formData.category === "blogs") && (
           <div ref={editorRef} className="mt-4"></div>
         )}
-        {publishError && <Alert>{publishError}</Alert>}
+        {formData.category === "resume" && (
+          <div>
+            {resumes?.map((resume) => (
+              <div
+                key={resume.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "10px",
+                  border:
+                    selectedResume?.id === resume.id
+                      ? "2px solid white"
+                      : "none", // Border for selected resume
+                  cursor: "pointer", // Change cursor to pointer
+                }}
+                onClick={() => handleResumeSelect(resume)} // Select resume on click
+                className="p-2 rounded-lg"
+              >
+                <span>
+                  {resume.layers[0]?.parts[0]?.text || "No text available"}
+                </span>
+                <span>{new Date(resume.created_at).toLocaleDateString()}</span>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex gap-2 justify-center mt-4">
           <button
             type="submit"
@@ -426,7 +515,16 @@ export default function CreatePost() {
           <button
             type="reset"
             className="bg-gray-300 text-black py-2 px-4 rounded-lg"
-            onClick={() => setFormData({ ...formData, content: "" })}
+            onClick={() => {
+              setFormData({
+                title: "",
+                category: "",
+                content: "",
+                subtitle: "",
+                coverImage: null,
+              });
+              setSelectedResume(null);
+            }}
           >
             Reset
           </button>

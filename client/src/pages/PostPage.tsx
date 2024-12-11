@@ -8,6 +8,8 @@ import "../css/post.css";
 import * as THREE from "three";
 import gsap from "gsap";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
 
 // Define Post interface
 interface Post {
@@ -19,6 +21,28 @@ interface Post {
   cover_image: string;
   created_at: string;
   slug: string;
+}
+
+// Define environment interface for tutorial category
+interface Layer {
+  id: number;
+  parts: {
+    text: string;
+    editable: boolean;
+  }[];
+}
+
+interface ResumeContent {
+  id: number;
+  user_id: string;
+  layers: Layer[];
+  colors: {
+    backgroundColor: string;
+    headingTextColor: string;
+    headingSubtextColor: string;
+  };
+  created_at: string;
+  updated_at: string;
 }
 
 // Dynamic Three.js Component Wrapper
@@ -82,6 +106,13 @@ export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [sanitizedContent, setSanitizedContent] = useState<string>("");
   const [recentPosts, setRecentPosts] = useState<Post[] | null>(null);
+  const [contentObject, setContentObject] = useState<ResumeContent | null>(
+    null
+  );
+  const mountRef = useRef<HTMLDivElement | null>(null);
+  const [currentLayerIndex, setCurrentLayerIndex] = useState(0);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
 
   // New state for dynamic code rendering
   const [renderedComponent, setRenderedComponent] =
@@ -106,14 +137,8 @@ export default function PostPage() {
           const fetchedPost = data.posts[0];
           setPost(fetchedPost);
 
-          // Sanitize content
-          const content = fetchedPost.content
-            ? DOMPurify.sanitize(fetchedPost.content)
-            : "";
-          setSanitizedContent(content);
-
-          // Extract and render code snippet
-          const codeMatch = content.match(
+          // Extract and remove code snippet from the content
+          const codeMatch = fetchedPost.content.match(
             /<pre><code class="language-(javascript|typescript)">([\s\S]*?)<\/code><\/pre>/
           );
 
@@ -123,6 +148,17 @@ export default function PostPage() {
               .replace(/&gt;/g, ">")
               .replace(/&amp;/g, "&");
 
+            // Remove the matched code snippet from the content
+            const contentWithoutCode = fetchedPost.content.replace(
+              /<pre><code class="language-(javascript|typescript)">([\s\S]*?)<\/code><\/pre>/,
+              ""
+            );
+
+            // Sanitize the content without the code
+            const sanitizedContent = DOMPurify.sanitize(contentWithoutCode);
+            setSanitizedContent(sanitizedContent);
+
+            // Set the extracted code to state
             setCodeSnippet(extractedCode);
 
             try {
@@ -134,8 +170,8 @@ export default function PostPage() {
                 const createComponent = new Function(
                   "React",
                   `return function DynamicComponent() { 
-                    ${extractedCode}
-                  }`
+                  ${extractedCode}
+                }`
                 );
 
                 const DynamicComponent = createComponent(React);
@@ -145,6 +181,12 @@ export default function PostPage() {
               console.error("Failed to execute code:", err);
               setRenderedComponent(null);
             }
+          } else {
+            // If no code match, sanitize the entire content
+            const content = fetchedPost.content
+              ? DOMPurify.sanitize(fetchedPost.content)
+              : "";
+            setSanitizedContent(content);
           }
 
           setError(false);
@@ -181,6 +223,128 @@ export default function PostPage() {
     };
     fetchRecentPosts();
   }, [post]); // Dependency on post to refetch when post changes
+
+  useEffect(() => {
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(contentObject?.colors.backgroundColor);
+    sceneRef.current = scene;
+
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
+    camera.position.z = 5;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    rendererRef.current = renderer;
+
+    if (mountRef.current) {
+      mountRef.current.innerHTML = "";
+      mountRef.current.appendChild(renderer.domElement);
+    }
+
+    const fontLoader = new FontLoader();
+    fontLoader.load(
+      "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json",
+      (font: any) => {
+        const meshes: THREE.Mesh[] = [];
+        contentObject?.layers.forEach((layer, layerIndex) => {
+          layer.parts.forEach((part, partIndex) => {
+            const geometry = new TextGeometry(part.text, {
+              font: font,
+              size: 0.3,
+              height: 0.05,
+            });
+            geometry.center();
+
+            const material = new THREE.MeshStandardMaterial({
+              color:
+                partIndex === 0
+                  ? contentObject.colors.headingTextColor
+                  : contentObject.colors.headingSubtextColor,
+              transparent: true,
+              opacity:
+                layerIndex === currentLayerIndex
+                  ? 1
+                  : layerIndex <= currentLayerIndex
+                  ? 0.1
+                  : 0.3,
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            const verticalSpacing = 0.5;
+            mesh.position.set(0, -partIndex * verticalSpacing, -layerIndex * 3);
+            meshes.push(mesh);
+            scene.add(mesh);
+          });
+        });
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0xffffff, 1);
+        pointLight.position.set(5, 5, 5);
+        scene.add(pointLight);
+
+        const animate = () => {
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
+        };
+        animate();
+      }
+    );
+
+    const zoomToLayer = () => {
+      const targetZ = 5 - currentLayerIndex * 4;
+      const animateZoom = () => {
+        requestAnimationFrame(animateZoom);
+        camera.position.z += (targetZ - camera.position.z) * 0.1;
+        if (Math.abs(camera.position.z - targetZ) < 0.01) {
+          camera.position.z = targetZ;
+          return;
+        }
+        renderer.render(scene, camera);
+      };
+      animateZoom();
+    };
+
+    zoomToLayer();
+
+    const handleResize = () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+      }
+      if (mountRef.current) {
+        mountRef.current.innerHTML = "";
+      }
+    };
+  }, [contentObject, currentLayerIndex]);
+
+  const handleNextLayer = () => {
+    if (!contentObject) {
+      return;
+    }
+    if (currentLayerIndex < contentObject?.layers.length - 1) {
+      setCurrentLayerIndex(currentLayerIndex + 1);
+    }
+  };
+
+  const handlePreviousLayer = () => {
+    if (currentLayerIndex > 0) {
+      setCurrentLayerIndex(currentLayerIndex - 1);
+    }
+  };
 
   if (loading) {
     return (
@@ -220,16 +384,55 @@ export default function PostPage() {
           className="mt-10 p-3 h-auto w-auto object-contain self-center"
         />
       )}
-      <div className="flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs">
-        <span>{post && new Date(post.created_at).toLocaleDateString()}</span>
-        <span className="italic">
-          {post && Math.ceil(post.content.length / 250) > 1
-            ? `${Math.ceil(post.content.length / 250)} mins read`
-            : ">1 min read"}
-        </span>
-      </div>
+      {post?.category === "tutorials" && (
+        <div className="flex justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs">
+          <span>{post && new Date(post.created_at).toLocaleDateString()}</span>
+          <span className="italic">
+            {post && Math.ceil(post.content.length / 250) > 1
+              ? `${Math.ceil(post.content.length / 250)} mins read`
+              : ">1 min read"}
+          </span>
+        </div>
+      )}
+      {post?.category === "tutorials" && (
+        <div
+          className="p-3 max-w-2xl mx-auto w-full post-content"
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+        ></div>
+      )}
+      {post?.category === "blogs" && (
+        <div
+          className="p-3 max-w-2xl mx-auto w-full post-content"
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+        ></div>
+      )}
+      {post?.category === "resume" && (
+        <div className="flex flex-col">
+          <div ref={mountRef} className="w-3/4 h-full relative" />
+          <div className="mt-4 mx-auto">
+            <button
+              onClick={handlePreviousLayer}
+              className="py-2 px-4 bg-gray-500 text-white mr-2 rounded-lg"
+              disabled={currentLayerIndex === 0}
+            >
+              Previous Layer
+            </button>
+            <button
+              onClick={handleNextLayer}
+              className="py-2 px-4 bg-gray-500 text-white rounded-lg"
+              disabled={
+                contentObject
+                  ? currentLayerIndex === contentObject.layers.length - 1
+                  : false
+              }
+            >
+              Next Layer
+            </button>
+          </div>
+        </div>
+      )}
       {renderedComponent && (
-        <div className="p-3 mx-auto w-full">
+        <div className="p-3 mx-auto w-full flex flex-col justify-center items-center">
           <div className="rendered-component">{renderedComponent}</div>
           {codeSnippet && (
             <div className="code-snippet flex flex-col justify-between p-3 border-b border-slate-500 mx-auto w-full max-w-2xl text-xs">

@@ -2,10 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 type CreateResumeProps = {};
 
+interface CurrentUser {
+  id: string;
+}
+
 const CreateResume: React.FC<CreateResumeProps> = () => {
+  const navigate = useNavigate();
+  const { currentUser } = useSelector(
+    (state: { user: { currentUser: CurrentUser | null } }) => state.user
+  );
   const mountRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
@@ -157,8 +167,6 @@ const CreateResume: React.FC<CreateResumeProps> = () => {
   };
 
   useEffect(() => {
-    if (!mountRef.current || !fontRef.current) return;
-
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(backgroundColor);
     sceneRef.current = scene;
@@ -277,6 +285,45 @@ const CreateResume: React.FC<CreateResumeProps> = () => {
   const handlePreviousLayer = () => {
     if (currentLayerIndex > 0) {
       setCurrentLayerIndex(currentLayerIndex - 1);
+    }
+  };
+
+  const handleCreateResume = async () => {
+    const resumeData = {
+      userId: currentUser?.id,
+      layers: layers.map((layer) => ({
+        id: layer.id,
+        parts: layer.parts.map((part) => ({
+          text: part.text,
+          editable: part.editable,
+        })),
+      })),
+      colors: {
+        backgroundColor,
+        headingTextColor,
+        headingSubtextColor,
+      },
+    };
+
+    try {
+      const response = await fetch("/api/resume/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(resumeData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save resume: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log("Resume saved successfully:", result);
+      navigate("/");
+    } catch (error) {
+      console.error("Error creating resume:", error);
+      alert("There was an error creating the resume. Please try again.");
     }
   };
 
@@ -419,19 +466,26 @@ const CreateResume: React.FC<CreateResumeProps> = () => {
         <div className="mt-4">
           <button
             onClick={handlePreviousLayer}
-            className="py-2 px-4 bg-gray-500 text-white mr-2"
+            className="py-2 px-4 bg-gray-500 text-white mr-2 rounded-lg"
             disabled={currentLayerIndex === 0}
           >
             Previous Layer
           </button>
           <button
             onClick={handleNextLayer}
-            className="py-2 px-4 bg-gray-500 text-white"
+            className="py-2 px-4 bg-gray-500 text-white rounded-lg"
             disabled={currentLayerIndex === layers.length - 1}
           >
             Next Layer
           </button>
         </div>
+        <button
+          onClick={handleCreateResume}
+          className="py-2 px-4 bg-gray-500 text-white my-4 rounded-lg hover:bg-gray-600"
+          disabled={layers.length <= 1 && layers[0].parts.length <= 1}
+        >
+          Create
+        </button>
       </div>
     </div>
   );

@@ -63,8 +63,6 @@ export const findPostComments = async (postId: number) => {
     // Execute the query and pass the values (postId)
     const result = await pool.query(findPostCommentsQuery, [postId]);
 
-    console.log(result.rows);
-
     // Return the comments found
     return result.rows;
   } catch (error) {

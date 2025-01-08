@@ -34,7 +34,7 @@ export const createModelResume = async (
     const insertResumeQuery = `
       INSERT INTO resumes (user_id, layers, colors, created_at, updated_at)
       VALUES ($1, $2, $3, DEFAULT, DEFAULT)
-      RETURNING *;  // Return the newly created resume
+      RETURNING *; 
     `;
 
     // Prepare the JSON values for `layers` and `colors`
